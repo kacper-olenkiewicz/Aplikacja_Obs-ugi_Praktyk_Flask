@@ -1,0 +1,41 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'wnioski' %}
+{% block title %}Moje wnioski §4{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wnioski o zaliczenie praktyki</h1>
+        <p class="muted">Zaliczenie na podstawie pracy zawodowej, stażu lub działalności (§4 Regulaminu)</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('wniosek_nowy') }}">+ Nowy wniosek</a>
+</div>
+
+{% if wnioski %}
+<div class="panel" style="padding:0;">
+    <table class="table">
+        <thead>
+            <tr><th>Pracodawca</th><th>Typ</th><th>Okres</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for w in wnioski %}
+            <tr>
+                <td style="font-weight:500;">{{ w.pracodawca_nazwa }}</td>
+                <td>{{ w.typ_label }}</td>
+                <td style="font-size:13px;color:var(--muted);">
+                    {{ w.data_od|pl_date if w.data_od else '—' }}
+                    {% if w.data_od and w.data_do %} – {% endif %}
+                    {{ w.data_do|pl_date if w.data_do else '' }}
+                </td>
+                <td><span class="badge badge-{{ w.status }}">{{ w.status_label }}</span></td>
+                <td><a class="btn btn-ghost btn-sm" href="{{ url_for('wniosek_detail', wniosek_id=w.id) }}">Szczegóły</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="panel">
+    <p class="muted" style="margin:0;">Nie złożono jeszcze żadnego wniosku.</p>
+</div>
+{% endif %}
+{% endblock %}

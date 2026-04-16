@@ -1,0 +1,85 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'studenci' %}
+{% block title %}Egzamin — {{ p.firma_nazwa }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Protokół egzaminu z praktyki</h1>
+        <p class="muted">{{ p.student.pelne_imie }} · {{ p.firma_nazwa }}</p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('promotor_praktyka', praktyka_id=p.id) }}">Anuluj</a>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+<div>
+
+<div class="panel">
+    <h2>Dane egzaminu (Zał. nr 8)</h2>
+    <form method="post">
+        <div class="form-grid">
+            <div class="field">
+                <label>Data egzaminu <span class="req">*</span></label>
+                <input type="date" name="data_egzaminu" required>
+            </div>
+            <div class="field">
+                <label>Ocena <span class="req">*</span></label>
+                <select name="ocena" required>
+                    <option value="">— wybierz —</option>
+                    {% for o in oceny %}
+                        <option value="{{ o }}">{{ o }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field full">
+                <label>Przewodniczący komisji <span class="req">*</span></label>
+                <input name="przewodniczacy" required placeholder="Imię i nazwisko, tytuł">
+            </div>
+            <div class="field full">
+                <label>Pozostali członkowie komisji</label>
+                <textarea name="czlonkowie" rows="3"
+                          placeholder="Po jednej osobie w wierszu: Imię Nazwisko, stanowisko"></textarea>
+            </div>
+            <div class="field full">
+                <label>Uwagi komisji (wpisane do protokołu)</label>
+                <textarea name="uwagi" rows="4"></textarea>
+            </div>
+        </div>
+        <div class="form-actions">
+            <a class="btn btn-ghost" href="{{ url_for('promotor_praktyka', praktyka_id=p.id) }}">Anuluj</a>
+            <button class="btn btn-primary" type="submit">Zapisz protokół i zalicz praktykę</button>
+        </div>
+    </form>
+</div>
+
+</div>
+<div>
+
+<div class="panel">
+    <h2>Podsumowanie praktyki</h2>
+    <dl class="kv" style="font-size:13px;grid-template-columns:110px 1fr;">
+        <dt>Student</dt><dd>{{ p.student.pelne_imie }}</dd>
+        <dt>Firma</dt><dd>{{ p.firma_nazwa }}</dd>
+        <dt>Okres</dt>
+        <dd>
+            {{ p.data_od|pl_date if p.data_od else '—' }}
+            {% if p.data_od and p.data_do %} – {{ p.data_do|pl_date }}{% endif %}
+        </dd>
+        <dt>Godziny (dziennik)</dt>
+        <dd>
+            <strong>{{ '%.1f'|format(suma_godzin) }} h</strong> / {{ wymagane_godziny }} h
+            {% if suma_godzin < wymagane_godziny %}
+                <br><span style="color:#856404;font-size:12px;">
+                    Brakuje {{ '%.1f'|format(wymagane_godziny - suma_godzin) }} h
+                </span>
+            {% endif %}
+        </dd>
+        <dt>BHP</dt>
+        <dd>{% if p.bhp_zaakceptowane %}Tak{% else %}<span style="color:var(--ans-red);">Nie</span>{% endif %}</dd>
+        <dt>Zal. sem. 6</dt>
+        <dd>{% if p.zaliczenie_sem6 %}Tak{% else %}<span style="color:var(--muted);">Nie</span>{% endif %}</dd>
+    </dl>
+</div>
+
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "admin/_layout.html" %}
+{% set nav = 'users' %}
+{% block title %}Użytkownicy{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Użytkownicy</h1>
+        <p class="muted">Łącznie: {{ users|length }}</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('admin_user_new') }}">+ Nowy użytkownik</a>
+</div>
+
+<div class="panel" style="margin-bottom:16px;">
+    <form method="get" style="display:flex;gap:10px;align-items:flex-end;">
+        <div class="field" style="flex:1;margin:0;">
+            <label style="font-size:13px;">Szukaj (imię, nazwisko, e-mail, nr albumu)</label>
+            <input name="q" value="{{ q }}" placeholder="np. Kowalski">
+        </div>
+        <div class="field" style="margin:0;">
+            <label style="font-size:13px;">Rola</label>
+            <select name="rola">
+                <option value="">— wszystkie —</option>
+                <option value="student"   {% if rola_filter=='student'   %}selected{% endif %}>Student</option>
+                <option value="promotor"  {% if rola_filter=='promotor'  %}selected{% endif %}>Promotor</option>
+                <option value="root"      {% if rola_filter=='root'      %}selected{% endif %}>Administrator</option>
+            </select>
+        </div>
+        <button class="btn btn-ghost" type="submit">Filtruj</button>
+        {% if q or rola_filter %}
+            <a class="btn btn-ghost" href="{{ url_for('admin_users') }}">Wyczysc</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if users %}
+<div class="panel" style="padding:0;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Imię i nazwisko</th>
+                <th>E-mail</th>
+                <th>Nr albumu</th>
+                <th>Kierunek</th>
+                <th>Sem.</th>
+                <th>Rola</th>
+                <th>Ostatnie logowanie</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+            <tr>
+                <td style="color:var(--muted);font-size:12px;">{{ u.id }}</td>
+                <td>
+                    <a href="{{ url_for('admin_user_edit', user_id=u.id) }}" style="font-weight:500;">
+                        {{ u.pelne_imie }}
+                    </a>
+                    {% if u.id == current_user_obj.id %}
+                        <span style="font-size:11px;color:var(--muted);"> (to Ty)</span>
+                    {% endif %}
+                </td>
+                <td style="font-size:13px;color:var(--muted);">{{ u.email }}</td>
+                <td>{{ u.nr_albumu or '—' }}</td>
+                <td style="font-size:13px;">{{ u.kierunek or '—' }}</td>
+                <td>{{ u.semestr or '—' }}</td>
+                <td>
+                    <span class="badge badge-{{ u.rola }}">{{ u.rola }}</span>
+                </td>
+                <td style="font-size:12px;color:var(--muted);">
+                    {{ u.last_login_at|pl_date if u.last_login_at else '—' }}
+                </td>
+                <td style="white-space:nowrap;">
+                    <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_user_edit', user_id=u.id) }}">Edytuj</a>
+                    {% if u.id != current_user_obj.id %}
+                        <form method="post" action="{{ url_for('admin_user_delete', user_id=u.id) }}" class="inline"
+                              onsubmit="return confirm('Usunąć użytkownika {{ u.pelne_imie }}? Tej operacji nie można cofnąć.');">
+                            <button class="btn btn-danger btn-sm" type="submit">Usuń</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <div class="panel">
+        <p class="muted" style="margin:0;">Brak użytkowników spełniających kryteria.</p>
+    </div>
+{% endif %}
+{% endblock %}

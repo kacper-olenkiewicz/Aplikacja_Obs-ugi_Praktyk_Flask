@@ -1,0 +1,379 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'studenci' %}
+{% block title %}{{ p.firma_nazwa }} · {{ p.student.pelne_imie }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ p.firma_nazwa }}</h1>
+        <p class="muted">
+            <span class="badge badge-{{ p.status }}">{{ p.status_label }}</span>
+            · {{ p.student.pelne_imie }}
+            {% if p.student.nr_albumu %} · nr alb. {{ p.student.nr_albumu }}{% endif %}
+        </p>
+    </div>
+    <div>
+        <a class="btn btn-ghost" href="{{ url_for('promotor_student', student_id=p.student.id) }}">← {{ p.student.pelne_imie }}</a>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+<div>
+
+<div class="panel">
+    <h2>Informacje o praktyce</h2>
+    <dl class="kv">
+        <dt>Firma / instytucja</dt><dd>{{ p.firma_nazwa }}</dd>
+        <dt>Adres</dt><dd>{{ p.firma_adres or '—' }}</dd>
+        <dt>NIP</dt><dd>{{ p.firma_nip or '—' }}</dd>
+        <dt>Profil działalności</dt><dd>{{ p.firma_profil or '—' }}</dd>
+        <dt>Semestry</dt><dd>{{ p.semestr_od or '—' }}–{{ p.semestr_do or '—' }}</dd>
+        <dt>Data rozpoczęcia</dt><dd>{{ p.data_od|pl_date or '—' }}</dd>
+        <dt>Data zakończenia</dt><dd>{{ p.data_do|pl_date or '—' }}</dd>
+        <dt>Liczba godzin</dt><dd>{{ p.liczba_godzin or '—' }}</dd>
+        <dt>Opiekun zakładowy</dt>
+        <dd>
+            {{ p.opiekun_zakladowy_imie_nazwisko or '—' }}
+            {% if p.opiekun_zakladowy_stanowisko %}
+                <br><small style="color:var(--muted);">{{ p.opiekun_zakladowy_stanowisko }}</small>
+            {% endif %}
+            {% if p.opiekun_zakladowy_kontakt %}
+                <br><small style="color:var(--muted);">{{ p.opiekun_zakladowy_kontakt }}</small>
+            {% endif %}
+            {% if p.opiekun_zakladowy_wyksztalcenie %}
+                <br><small style="color:var(--muted);">{{ p.opiekun_zakladowy_wyksztalcenie }}</small>
+            {% endif %}
+        </dd>
+        <dt>Porozumienie</dt>
+        <dd>{% if p.porozumienie_podpisane %}<span style="color:var(--ans-red);font-weight:600;">Podpisane</span>{% else %}<span style="color:var(--muted);">Nie potwierdzono</span>{% endif %}</dd>
+        <dt>Skierowanie</dt>
+        <dd>{% if p.skierowanie_wystawione %}<span style="color:var(--ans-red);font-weight:600;">Wystawione</span>{% else %}<span style="color:var(--muted);">Nie wystawiono</span>{% endif %}</dd>
+        {% if p.data_do and p.data_do.month > 2 %}
+        <dt></dt>
+        <dd><span style="font-size:12px;color:#856404;">Uwaga: data zakończenia przekracza połowę lutego (§3 Org. pkt 2)</span></dd>
+        {% endif %}
+        <dt>Tryb realizacji</dt>
+        <dd>
+            {% if p.tryb_realizacji == 'ciagla' %}Ciągła
+            {% elif p.tryb_realizacji == 'etapowa' %}Etapowa
+            {% else %}—{% endif %}
+        </dd>
+        <dt>BHP potwierdzone</dt>
+        <dd>{% if p.bhp_zaakceptowane %}Tak{% else %}<span style="color:var(--ans-red);">Nie</span>{% endif %}</dd>
+        <dt>Regulamin zapoznany</dt>
+        <dd>{% if p.regulamin_zapoznany %}Tak{% else %}<span style="color:var(--ans-red);">Nie</span>{% endif %}</dd>
+        <dt>Ubezpieczenie NNW</dt>
+        <dd>{% if p.ubezpieczenie_nnw %}Tak{% else %}<span style="color:var(--muted);">Nie</span>{% endif %}</dd>
+        {% if p.erasmus_plus %}
+        <dt>Erasmus+</dt><dd>Tak</dd>
+        {% endif %}
+        <dt>Dziennik (ZOPZ)</dt>
+        <dd>{% if p.dziennik_potwierdzony_zopz %}<span style="color:var(--ans-red);font-weight:600;">Potwierdzony</span>{% else %}<span style="color:var(--muted);">Nie potwierdzono</span>{% endif %}</dd>
+        <dt>Sprawozdanie (ZOPZ)</dt>
+        <dd>{% if p.sprawozdanie_podpisane_zopz %}<span style="color:var(--ans-red);font-weight:600;">Podpisane</span>{% else %}<span style="color:var(--muted);">Nie podpisano</span>{% endif %}</dd>
+        {% if p.termin_zlozenia_dokumentow %}
+        <dt>Termin dokumentacji</dt>
+        <dd>{{ p.termin_zlozenia_dokumentow|pl_date }} <small style="color:var(--muted);">(7 dni od zakończenia)</small></dd>
+        {% endif %}
+        <dt>Zakres zadań</dt>
+        <dd>{{ p.zakres_zadan|replace('\n','<br>')|safe if p.zakres_zadan else '—' }}</dd>
+        <dt>Harmonogram</dt>
+        <dd>{{ p.harmonogram|replace('\n','<br>')|safe if p.harmonogram else '—' }}</dd>
+    </dl>
+</div>
+
+{% if p.sprawozdanie_tresc or p.sprawozdanie_wnioski %}
+<div class="panel">
+    <h2>Sprawozdanie studenta</h2>
+    {% if p.sprawozdanie_tresc %}
+        <p style="margin:0 0 10px;">{{ p.sprawozdanie_tresc|replace('\n','<br>')|safe }}</p>
+    {% endif %}
+    {% if p.sprawozdanie_wnioski %}
+        <h3 style="font-size:14px;margin:12px 0 6px;">Wnioski</h3>
+        <p style="margin:0;">{{ p.sprawozdanie_wnioski|replace('\n','<br>')|safe }}</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="panel">
+    <div class="panel-head">
+        <h2>Dziennik praktyki</h2>
+        <span style="font-size:14px;color:var(--muted);">Suma: <strong>{{ '%.1f'|format(suma_godzin) }} h</strong> / {{ wpisy|length }} wpisów</span>
+    </div>
+    {% if wpisy %}
+        <table class="table">
+            <thead>
+                <tr><th>Data</th><th>Godziny</th><th>Opis czynności</th><th>Efekty</th></tr>
+            </thead>
+            <tbody>
+            {% for w in wpisy %}
+                <tr>
+                    <td style="white-space:nowrap;">{{ w.data|pl_date }}</td>
+                    <td style="white-space:nowrap;">
+                        {% if w.godz_od %}{{ w.godz_od|pl_time }}–{{ w.godz_do|pl_time }}{% endif %}
+                        {% if w.liczba_godzin %}<br><small style="color:var(--muted);">{{ w.liczba_godzin }}h</small>{% endif %}
+                    </td>
+                    <td style="max-width:320px;">{{ w.opis }}</td>
+                    <td style="max-width:200px;color:var(--muted);font-size:13px;">{{ w.efekty or '—' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted" style="margin:0;">Brak wpisów w dzienniku.</p>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <div class="panel-head" style="margin-bottom:12px;">
+        <h2>Hospitacje</h2>
+        <span style="font-size:13px;color:var(--muted);">
+            {{ p.hospitacje.count() }} / min. 1 wymagana
+            {% if p.hospitacje.count() == 0 %}<span style="color:#856404;"> — brak</span>{% endif %}
+        </span>
+    </div>
+    {% if p.hospitacje.count() %}
+    <table class="table" style="margin-bottom:14px;">
+        <thead><tr><th>Data</th><th>Prowadzący</th><th>Notatka</th><th></th></tr></thead>
+        <tbody>
+        {% for h in p.hospitacje %}
+            <tr>
+                <td style="white-space:nowrap;">{{ h.data|pl_date }}</td>
+                <td>{{ h.prowadzacy }}</td>
+                <td style="font-size:13px;color:var(--muted);">{{ h.notatka or '—' }}</td>
+                <td>
+                    <form method="post"
+                          action="{{ url_for('promotor_hospitacja_usun', praktyka_id=p.id, h_id=h.id) }}"
+                          class="inline">
+                        <button class="btn btn-danger btn-sm" type="submit">Usuń</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    <form method="post" action="{{ url_for('promotor_hospitacja_dodaj', praktyka_id=p.id) }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div class="field" style="margin:0;">
+                <label style="font-size:12px;">Data hospitacji</label>
+                <input type="date" name="data">
+            </div>
+            <div class="field" style="margin:0;">
+                <label style="font-size:12px;">Prowadzący</label>
+                <input name="prowadzacy" placeholder="Imię i nazwisko">
+            </div>
+        </div>
+        <div class="field" style="margin-bottom:8px;">
+            <label style="font-size:12px;">Notatka</label>
+            <input name="notatka" placeholder="Opcjonalne uwagi">
+        </div>
+        <button class="btn btn-ghost btn-sm" type="submit">+ Dodaj hospitację</button>
+    </form>
+</div>
+
+<div class="panel">
+    <h2>Dokumenty studenta</h2>
+    {% if docs %}
+        <table class="table">
+            <thead><tr><th>Plik</th><th>Typ</th><th>Data</th><th></th></tr></thead>
+            <tbody>
+            {% for d in docs %}
+                <tr>
+                    <td>{{ d.nazwa_oryginalna }}</td>
+                    <td>{{ d.typ_label }}</td>
+                    <td style="white-space:nowrap;">{{ d.created_at|pl_date }}</td>
+                    <td>
+                        <a class="btn btn-ghost btn-sm"
+                           href="{{ url_for('dokument_pobierz', praktyka_id=p.id, dok_id=d.id) }}">
+                            Pobierz
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted" style="margin:0;">Brak wgranych dokumentów.</p>
+    {% endif %}
+</div>
+
+</div>
+<div>
+
+{% if p.status in ('zgloszona', 'do_oceny', 'w_trakcie') %}
+<div class="panel" style="border-color:var(--ans-red);">
+    <h2>Akcja promotora</h2>
+
+    {% if p.status == 'zgloszona' %}
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+            Student zgłosił wniosek o odbycie praktyki. Sprawdź dane firmy i opiekuna, a następnie zaakceptuj lub odrzuć zgłoszenie.
+        </p>
+    {% elif p.status == 'w_trakcie' %}
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+            Praktyka w trakcie realizacji. Możesz wystawić zaliczenie częściowe po semestrze 6.
+        </p>
+    {% else %}
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+            Student złożył dokumentację do oceny. Sprawdź dziennik i sprawozdanie, a następnie wystaw ocenę.
+        </p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('promotor_akcja', praktyka_id=p.id) }}">
+        <div class="field" style="margin-bottom:12px;">
+            <label>Komentarz (widoczny dla studenta)</label>
+            <textarea name="komentarz" rows="3">{{ p.komentarz_promotora or '' }}</textarea>
+        </div>
+
+        {% if p.status == 'do_oceny' %}
+        <div style="margin-bottom:14px;padding:10px 12px;border-radius:6px;font-size:13px;
+            {% if suma_godzin < wymagane_godziny %}
+                background:#fff3cd;border:1px solid #ffc107;
+            {% else %}
+                background:#e8f5e9;border:1px solid #4caf50;
+            {% endif %}">
+            <strong>Godziny z dziennika:</strong> {{ '%.1f'|format(suma_godzin) }} h / wymagane {{ wymagane_godziny }} h
+            {% if suma_godzin < wymagane_godziny %}
+                <br><span style="color:#856404;">Brakuje {{ '%.1f'|format(wymagane_godziny - suma_godzin) }} h do wymaganego wymiaru (program studiów).</span>
+            {% else %}
+                <span style="color:#2e7d32;"> — wymiar spełniony.</span>
+            {% endif %}
+            {% if not p.bhp_zaakceptowane %}
+                <br><span style="color:#856404;">Student nie potwierdził zapoznania z BHP.</span>
+            {% endif %}
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+            <label>Ocena <span class="req">*</span></label>
+            <select name="ocena" required>
+                <option value="">— wybierz —</option>
+                {% for o in oceny %}
+                    <option value="{{ o }}" {% if p.ocena == o %}selected{% endif %}>{{ o }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        {% if p.status == 'zgloszona' %}
+        <div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;">
+            <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="porozumienie_podpisane" value="1" style="margin-top:2px;"
+                       {% if p.porozumienie_podpisane %}checked{% endif %}>
+                Porozumienie z zakładem pracy podpisane (Zał. 1)
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="skierowanie_wystawione" value="1" style="margin-top:2px;"
+                       {% if p.skierowanie_wystawione %}checked{% endif %}>
+                Skierowanie na praktykę wystawione (Zał. 3)
+            </label>
+        </div>
+        {% endif %}
+
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            {% if p.status == 'zgloszona' %}
+                <button class="btn btn-primary" type="submit" name="akcja" value="akceptuj">
+                    Zaakceptuj zgłoszenie
+                </button>
+            {% elif p.status == 'w_trakcie' %}
+                {% if not p.zaliczenie_sem6 %}
+                    <button class="btn btn-primary" type="submit" name="akcja" value="zalicz_sem6">
+                        Zalicz sem. 6 (zaliczenie częściowe)
+                    </button>
+                {% else %}
+                    <p style="font-size:13px;color:var(--muted);margin:0;">
+                        Zaliczenie sem. 6 wystawione {{ p.data_zaliczenia_sem6|pl_date }}.
+                    </p>
+                {% endif %}
+            {% elif p.status == 'do_oceny' %}
+                <a class="btn btn-primary"
+                   href="{{ url_for('promotor_egzamin', praktyka_id=p.id) }}">
+                    Przeprowadź egzamin komisyjny
+                </a>
+            {% endif %}
+            {% if p.status in ('zgloszona', 'do_oceny') %}
+            <button class="btn btn-danger" type="submit" name="akcja" value="odrzuc"
+                    onclick="return confirm('Na pewno odrzucić?');">
+                Odrzuc
+            </button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{% if p.status in ('w_trakcie', 'do_oceny', 'zaliczona') %}
+<div class="panel">
+    <h2>Potwierdzenia ZOPZ</h2>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">
+        Opiekun zakładowy (ZOPZ) potwierdza prowadzenie dokumentacji praktyki.
+    </p>
+    <form method="post" action="{{ url_for('promotor_zopz', praktyka_id=p.id) }}">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+            <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="dziennik_potwierdzony_zopz" value="1" style="margin-top:2px;"
+                       {% if p.dziennik_potwierdzony_zopz %}checked{% endif %}>
+                Dziennik praktyki potwierdzony przez ZOPZ (Dokumentowanie pkt 4a)
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="sprawozdanie_podpisane_zopz" value="1" style="margin-top:2px;"
+                       {% if p.sprawozdanie_podpisane_zopz %}checked{% endif %}>
+                Sprawozdanie podpisane przez ZOPZ (Dokumentowanie pkt 4b)
+            </label>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="submit">Zapisz potwierdzenia</button>
+    </form>
+</div>
+{% endif %}
+
+{% if p.egzamin %}
+<div class="panel">
+    <h2>Protokół egzaminu</h2>
+    <dl class="kv" style="font-size:13px;grid-template-columns:130px 1fr;">
+        <dt>Data egzaminu</dt><dd>{{ p.egzamin.data_egzaminu|pl_date }}</dd>
+        <dt>Przewodniczący</dt><dd>{{ p.egzamin.przewodniczacy }}</dd>
+        {% if p.egzamin.czlonkowie %}
+            <dt>Członkowie</dt><dd>{{ p.egzamin.czlonkowie|replace('\n','<br>')|safe }}</dd>
+        {% endif %}
+        <dt>Ocena</dt><dd style="font-size:20px;font-weight:600;color:var(--ans-red);">{{ p.egzamin.ocena }}</dd>
+        {% if p.egzamin.uwagi %}
+            <dt>Uwagi</dt><dd>{{ p.egzamin.uwagi|replace('\n','<br>')|safe }}</dd>
+        {% endif %}
+    </dl>
+</div>
+{% endif %}
+
+{% if p.komentarz_promotora and p.status not in ('zgloszona', 'do_oceny') %}
+<div class="panel">
+    <h2>Komentarz promotora</h2>
+    <p style="margin:0;font-size:14px;">{{ p.komentarz_promotora|replace('\n','<br>')|safe }}</p>
+    {% if p.ocena %}
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+        <div style="font-size:32px;font-weight:600;color:var(--ans-red);">{{ p.ocena }}</div>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="panel">
+    <h2>Dane studenta</h2>
+    <dl class="kv" style="font-size:13px;grid-template-columns:100px 1fr;">
+        <dt>Imię i nazwisko</dt><dd>{{ p.student.pelne_imie }}</dd>
+        <dt>E-mail</dt><dd>{{ p.student.email }}</dd>
+        <dt>Nr albumu</dt><dd>{{ p.student.nr_albumu or '—' }}</dd>
+        <dt>Kierunek</dt><dd>{{ p.student.kierunek or '—' }}</dd>
+        <dt>Semestr</dt><dd>{{ p.student.semestr or '—' }}</dd>
+        <dt>Telefon</dt><dd>{{ p.student.telefon or '—' }}</dd>
+    </dl>
+</div>
+
+<div class="panel">
+    <h2>Pobierz PDF</h2>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta') }}">Karta praktyki</a>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Dziennik</a>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='sprawozdanie') }}">Sprawozdanie</a>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='ankieta') }}">Ankieta</a>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='program') }}">Program i harmonogram (Zał. 2a)</a>
+    </div>
+</div>
+
+</div>
+</div>
+{% endblock %}

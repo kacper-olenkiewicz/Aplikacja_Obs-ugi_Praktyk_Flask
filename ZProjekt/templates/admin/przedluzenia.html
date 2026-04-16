@@ -1,0 +1,76 @@
+{% extends "admin/_layout.html" %}
+{% set nav = 'przedluzenia' %}
+{% block title %}Wnioski o przedłużenie{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wnioski o przedłużenie praktyki</h1>
+        <p class="muted">§6.2–6.3 Regulaminu · decyzja dyrektora</p>
+    </div>
+</div>
+
+{% if wnioski %}
+<div class="panel" style="padding:0;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Firma</th>
+                <th>Powód</th>
+                <th>Godz. nieobecności</th>
+                <th>Prop. data do</th>
+                <th>Data złożenia</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for wn in wnioski %}
+            <tr>
+                <td>{{ wn.praktyka.student.pelne_imie }}</td>
+                <td>{{ wn.praktyka.firma_nazwa }}</td>
+                <td>{{ wn.powod_label }}</td>
+                <td>{{ wn.godziny_nieobecnosci or '—' }}</td>
+                <td style="white-space:nowrap;">{{ wn.proponowana_data_do|pl_date if wn.proponowana_data_do else '—' }}</td>
+                <td style="font-size:13px;color:var(--muted);">{{ wn.created_at|pl_date }}</td>
+                <td>
+                    <span class="badge badge-{{ wn.status }}">{{ wn.status_label }}</span>
+                    {% if wn.nowa_data_do %}
+                        <br><small style="color:var(--muted);">do {{ wn.nowa_data_do|pl_date }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if wn.status == 'zlozony' %}
+                    <form method="post" action="{{ url_for('admin_przedluzenie_akcja', wniosek_id=wn.id) }}"
+                          style="display:flex;flex-direction:column;gap:6px;min-width:200px;">
+                        <input type="date" name="nowa_data_do"
+                               value="{{ wn.proponowana_data_do.isoformat() if wn.proponowana_data_do else '' }}"
+                               style="font-size:12px;">
+                        <input name="komentarz" placeholder="Komentarz (opcjonalnie)" style="font-size:12px;">
+                        <div style="display:flex;gap:4px;">
+                            <button class="btn btn-primary btn-sm" type="submit" name="akcja" value="zatwierdz">
+                                Zatwierdź
+                            </button>
+                            <button class="btn btn-danger btn-sm" type="submit" name="akcja" value="odrzuc"
+                                    onclick="return confirm('Odrzucić wniosek?');">
+                                Odrzuć
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                        {% if wn.komentarz %}
+                            <small style="color:var(--muted);">{{ wn.komentarz }}</small>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="panel">
+    <p class="muted" style="margin:0;">Brak wniosków o przedłużenie.</p>
+</div>
+{% endif %}
+{% endblock %}

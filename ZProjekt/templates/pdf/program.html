@@ -1,0 +1,63 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}PROGRAM I HARMONOGRAM PRAKTYKI ZAWODOWEJ{% endblock %}
+{% block doc_subtitle %}Załącznik nr 2a do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<h2>1. Dane studenta</h2>
+<table class="kv">
+    <tr><td class="k">Imię i nazwisko</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
+    <tr><td class="k">Rok / semestr</td><td>{{ student.rok_studiow or '' }} / {{ student.semestr or '' }}</td></tr>
+</table>
+
+<h2>2. Miejsce odbywania praktyki</h2>
+<table class="kv">
+    <tr><td class="k">Nazwa firmy / instytucji</td><td>{{ p.firma_nazwa }}</td></tr>
+    <tr><td class="k">Adres</td><td>{{ p.firma_adres or '' }}</td></tr>
+    <tr><td class="k">Profil działalności</td><td>{{ p.firma_profil or '' }}</td></tr>
+    <tr><td class="k">Opiekun zakładowy (ZOPZ)</td>
+        <td>
+            {{ p.opiekun_zakladowy_imie_nazwisko or '' }}
+            {% if p.opiekun_zakladowy_stanowisko %}, {{ p.opiekun_zakladowy_stanowisko }}{% endif %}
+            {% if p.opiekun_zakladowy_wyksztalcenie %}<br>Wykształcenie: {{ p.opiekun_zakladowy_wyksztalcenie }}{% endif %}
+        </td></tr>
+</table>
+
+<h2>3. Terminy realizacji</h2>
+<table class="kv">
+    <tr><td class="k">Rok akademicki</td><td>{{ p.rok_akademicki or '' }}</td></tr>
+    <tr><td class="k">Semestry</td><td>{{ p.semestr_od or '' }} – {{ p.semestr_do or '' }}</td></tr>
+    <tr><td class="k">Data rozpoczęcia</td><td>{{ p.data_od|pl_date }}</td></tr>
+    <tr><td class="k">Data zakończenia</td><td>{{ p.data_do|pl_date }}</td></tr>
+    <tr><td class="k">Wymiar godzin (plan)</td><td>{{ p.liczba_godzin or '' }} h / wymagane 960 h</td></tr>
+    <tr><td class="k">Tryb realizacji</td>
+        <td>
+            {% if p.tryb_realizacji == 'ciagla' %}Ciągła
+            {% elif p.tryb_realizacji == 'etapowa' %}Etapowa
+            {% else %}—{% endif %}
+        </td></tr>
+</table>
+
+<h2>4. Program praktyki (zakres zadań)</h2>
+<div class="block">{{ (p.zakres_zadan or '')|replace('\n','<br>')|safe }}</div>
+
+<h2>5. Harmonogram realizacji</h2>
+<div class="block">{{ (p.harmonogram or '')|replace('\n','<br>')|safe }}</div>
+
+<h2>6. Uzgodnienie</h2>
+<p class="small">
+    Program i harmonogram praktyki zostały uzgodnione pomiędzy studentem, Uczelnianym opiekunem praktyk zawodowych (UOPZ)
+    oraz Zakładowym opiekunem praktyki zawodowej (ZOPZ) zgodnie z §3 pkt 5 Regulaminu praktyk zawodowych.
+</p>
+
+<table class="sign">
+    <tr>
+        <td>{{ today|pl_date }}<br><span class="small">data i podpis studenta</span></td>
+        <td>&nbsp;<br><span class="small">podpis UOPZ (promotor uczelniany)</span></td>
+    </tr>
+    <tr>
+        <td colspan="2" style="padding-top:40px;"><span class="small">podpis ZOPZ (opiekun zakładowy)</span></td>
+    </tr>
+</table>
+{% endblock %}

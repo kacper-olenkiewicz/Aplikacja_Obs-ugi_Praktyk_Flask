@@ -1,0 +1,50 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}DZIENNIK PRAKTYKI ZAWODOWEJ{% endblock %}
+{% block doc_subtitle %}Załącznik nr 6 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<table class="kv">
+    <tr><td class="k">Student</td><td>{{ student.pelne_imie }} ({{ student.nr_albumu or '' }})</td></tr>
+    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
+    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</td></tr>
+    <tr><td class="k">Okres praktyki</td><td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }}</td></tr>
+</table>
+
+<h2>Przebieg praktyki</h2>
+<table class="tbl">
+    <thead>
+        <tr>
+            <th style="width:15%">Data</th>
+            <th style="width:12%">Godziny</th>
+            <th style="width:8%">Liczba<br>godzin</th>
+            <th>Opis wykonanych czynności</th>
+            <th style="width:25%">Uzyskane efekty</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for w in wpisy %}
+        <tr>
+            <td>{{ w.data|pl_date }}</td>
+            <td>{% if w.godz_od %}{{ w.godz_od|pl_time }}–{{ w.godz_do|pl_time }}{% endif %}</td>
+            <td>{{ w.liczba_godzin or '' }}</td>
+            <td>{{ w.opis|replace('\n','<br>')|safe }}</td>
+            <td>{{ (w.efekty or '')|replace('\n','<br>')|safe }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="5" style="text-align:center;color:#666;">Brak wpisów w dzienniku</td></tr>
+    {% endfor %}
+        <tr>
+            <td colspan="2" style="text-align:right;font-weight:bold;background:#eee;">Suma godzin</td>
+            <td style="background:#eee;font-weight:bold;">{{ '%.1f'|format(suma_godzin) }}</td>
+            <td colspan="2" style="background:#eee;"></td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="sign">
+    <tr>
+        <td>{{ today|pl_date }}<br><span class="small">podpis studenta</span></td>
+        <td>&nbsp;<br><span class="small">podpis opiekuna zakładowego</span></td>
+    </tr>
+</table>
+{% endblock %}

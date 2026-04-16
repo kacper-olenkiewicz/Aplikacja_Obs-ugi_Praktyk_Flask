@@ -1,0 +1,106 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'dashboard' %}
+{% block title %}Panel opiekuna · Praktyki ANS{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Panel opiekuna</h1>
+        <p class="muted">Przeglądaj praktyki podopiecznych i zarządzaj ich statusem.</p>
+    </div>
+    <div>
+        <a class="btn btn-ghost" href="{{ url_for('promotor_studenci') }}">Wszyscy podopieczni</a>
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <div class="label">Podopieczni</div>
+        <div class="value">{{ liczba_studentow }}</div>
+        <div class="hint">ze zgłoszonymi praktykami</div>
+    </div>
+    <div class="stat">
+        <div class="label">Oczekujące akcji</div>
+        <div class="value" style="color:var(--ans-red);">{{ oczekujace|length }}</div>
+        <div class="hint">do zatwierdzenia lub zaliczenia</div>
+    </div>
+    <div class="stat">
+        <div class="label">W trakcie realizacji</div>
+        <div class="value">{{ w_trakcie|length }}</div>
+        <div class="hint">aktywne praktyki</div>
+    </div>
+    <div class="stat">
+        <div class="label">Wszystkie zgłoszenia</div>
+        <div class="value">{{ wszystkie|length }}</div>
+        <div class="hint">łącznie</div>
+    </div>
+</div>
+
+{% if oczekujace %}
+<div class="panel">
+    <div class="panel-head">
+        <h2>Wymagają akcji</h2>
+        <span class="badge badge-zgloszona">{{ oczekujace|length }}</span>
+    </div>
+    <table class="table">
+        <thead>
+            <tr><th>Student</th><th>Firma</th><th>Okres</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for p in oczekujace %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('promotor_student', student_id=p.student.id) }}">
+                        {{ p.student.pelne_imie }}
+                    </a>
+                    {% if p.student.nr_albumu %}
+                    <br><small style="color:var(--muted);">{{ p.student.nr_albumu }}</small>
+                    {% endif %}
+                </td>
+                <td><strong>{{ p.firma_nazwa }}</strong></td>
+                <td style="white-space:nowrap;">{{ p.data_od|pl_date }} – {{ p.data_do|pl_date or '—' }}</td>
+                <td><span class="badge badge-{{ p.status }}">{{ p.status_label }}</span></td>
+                <td><a class="btn btn-primary btn-sm" href="{{ url_for('promotor_praktyka', praktyka_id=p.id) }}">Rozpatrz</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if w_trakcie %}
+<div class="panel">
+    <div class="panel-head"><h2>Trwające praktyki</h2></div>
+    <table class="table">
+        <thead>
+            <tr><th>Student</th><th>Firma</th><th>Okres</th><th>Godziny w dzienniku</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for p in w_trakcie %}
+            {% set suma = namespace(v=0) %}
+            {% for w in p.wpisy_dziennika %}
+                {% if w.liczba_godzin %}{% set suma.v = suma.v + w.liczba_godzin %}{% endif %}
+            {% endfor %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('promotor_student', student_id=p.student.id) }}">{{ p.student.pelne_imie }}</a>
+                </td>
+                <td>{{ p.firma_nazwa }}</td>
+                <td style="white-space:nowrap;">{{ p.data_od|pl_date }} – {{ p.data_do|pl_date or '—' }}</td>
+                <td>{{ '%.1f'|format(suma.v) }} h / {{ p.wpisy_dziennika.count() }} wpisów</td>
+                <td><a class="btn btn-ghost btn-sm" href="{{ url_for('promotor_praktyka', praktyka_id=p.id) }}">Podgląd</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if not oczekujace and not w_trakcie %}
+<div class="panel">
+    <div class="empty">
+        <h3>Brak praktyk wymagających uwagi</h3>
+        <p>Wszystkie zgłoszenia są rozpatrzone lub nie ma jeszcze żadnych podopiecznych.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

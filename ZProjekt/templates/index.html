@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Witaj · Praktyki ANS Elbląg{% endblock %}
+{% block content %}
+<section class="hero hero-split">
+    <div class="hero-card">
+        <img class="hero-logo" src="{{ url_for('static', filename='logo-ans.png') }}" alt="ANS w Elblągu">
+        <h1>Logowanie</h1>
+        <p class="lead">
+            Zaloguj się kontem uczelnianym, aby przejść do panelu praktyk.
+        </p>
+
+        {% if user %}
+            <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('dashboard') }}">Przejdź do panelu</a>
+        {% else %}
+            <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('login') }}">
+                <svg viewBox="0 0 23 23" width="18" height="18" aria-hidden="true">
+                    <rect x="1"  y="1"  width="10" height="10" fill="#f25022"/>
+                    <rect x="12" y="1"  width="10" height="10" fill="#7fba00"/>
+                    <rect x="1"  y="12" width="10" height="10" fill="#00a4ef"/>
+                    <rect x="12" y="12" width="10" height="10" fill="#ffb900"/>
+                </svg>
+                Zaloguj się kontem Microsoft
+            </a>
+            <p class="hint">Użyj konta w domenie uczelnianej (np. <code>…@student.ans-elblag.pl</code>).</p>
+        {% endif %}
+
+        {% if dev_login and not user %}
+            <div class="dev-panel">
+                <h3>Tryb DEV — szybkie logowanie</h3>
+                <p class="hint">Widoczne tylko gdy <code>DEV_LOGIN=1</code> w <code>.env</code>.</p>
+                {% if dev_users %}
+                    <ul class="dev-users">
+                        {% for u in dev_users %}
+                            <li>
+                                <a class="btn btn-secondary" href="{{ url_for('dev_login', user_id=u.id) }}">
+                                    {{ u.imie or '' }} {{ u.nazwisko or '' }}
+                                    <small>({{ u.rola }} · {{ u.email }})</small>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Brak użytkowników — dodaj przez <code>flask create-user --email ... --rola ...</code>.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <aside class="hero-side">
+        <div class="hero-photo">
+            <img src="{{ url_for('static', filename='uczelnia.jpg') }}" alt="Budynek ANS w Elblągu">
+        </div>
+        <div class="hero-copy">
+            <h2>Rozliczaj i sprawdzaj swoje praktyki</h2>
+            <p>
+                Składaj dokumenty, prowadź dziennik praktyki i śledź status zaliczenia —
+                wszystko w jednym miejscu, dostępne kontem uczelnianym.
+            </p>
+            <ul class="features">
+                <li>Dziennik praktyki online</li>
+                <li>Karta praktyki i sprawozdanie</li>
+                <li>Podgląd efektów uczenia się</li>
+            </ul>
+        </div>
+    </aside>
+</section>
+{% endblock %}

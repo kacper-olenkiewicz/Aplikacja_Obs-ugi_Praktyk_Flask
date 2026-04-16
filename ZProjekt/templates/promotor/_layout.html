@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set nav = nav|default('dashboard') %}
+{% block body %}
+<div class="app">
+    <aside class="sidebar">
+        <a href="{{ url_for('promotor_dashboard') }}" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='logo-ans.png') }}" alt="ANS">
+            <div>
+                <div style="font-weight:600;font-size:14px;">Praktyki</div>
+                <small>Opiekun UOPZ</small>
+            </div>
+        </a>
+
+        <a href="{{ url_for('promotor_dashboard') }}" class="sidebar-link {% if nav=='dashboard' %}active{% endif %}">
+            <span class="ico">&#9632;</span> Panel główny
+        </a>
+        <a href="{{ url_for('promotor_studenci') }}" class="sidebar-link {% if nav=='studenci' %}active{% endif %}">
+            <span class="ico">&#9741;</span> Podopieczni
+        </a>
+        <a href="{{ url_for('promotor_wnioski') }}" class="sidebar-link {% if nav=='wnioski' %}active{% endif %}">
+            <span class="ico">&#9633;</span> Wnioski §4
+        </a>
+
+        {% if current_user_obj and current_user_obj.rola == 'root' %}
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 8px;">
+        <a href="{{ url_for('admin_users') }}" class="sidebar-link">
+            <span class="ico">&#9881;</span> Panel admina
+        </a>
+        {% endif %}
+
+        <div class="sidebar-footer">
+            {% if current_user_obj %}
+                <div class="u-name">{{ current_user_obj.pelne_imie }}</div>
+                <div class="u-meta">{{ current_user_obj.email }}</div>
+                <div class="u-meta">Opiekun UOPZ</div>
+                <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="{{ url_for('logout') }}">Wyloguj</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="app-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-wrap">
+            {% for cat, msg in messages %}
+              <div class="flash flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block main %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

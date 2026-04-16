@@ -1,0 +1,145 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'studenci' %}
+{% block title %}Podopieczni · Praktyki ANS{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Podopieczni</h1>
+        <p class="muted">
+            Studenci z przypisanymi praktykami.
+            {% if pagination %}({{ pagination.total }}){% endif %}
+        </p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('promotor_export_csv') }}" title="Pobierz listę praktyk jako CSV (Excel)">
+        Eksportuj CSV
+    </a>
+</div>
+
+<div class="panel" style="margin-bottom:16px;">
+    <form method="get" class="filter-bar">
+        <div class="field filter-search">
+            <label style="font-size:13px;">Szukaj</label>
+            <input name="q" value="{{ q }}" placeholder="Kowalski / nr albumu">
+        </div>
+        <div class="field filter-select">
+            <label style="font-size:13px;">Status praktyki</label>
+            <select name="status">
+                <option value="">— wszystkie —</option>
+                {% for k, v in statusy.items() %}
+                <option value="{{ k }}" {% if status_filter == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if kierunki %}
+        <div class="field filter-select">
+            <label style="font-size:13px;">Kierunek</label>
+            <select name="kierunek">
+                <option value="">— wszystkie —</option>
+                {% for k in kierunki %}
+                <option value="{{ k }}" {% if kierunek_filter == k %}selected{% endif %}>{{ k }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="field filter-select">
+            <label style="font-size:13px;">Sortuj</label>
+            <select name="sort">
+                <option value="nazwisko" {% if sort_by == 'nazwisko' %}selected{% endif %}>Nazwisko</option>
+                <option value="nr_albumu" {% if sort_by == 'nr_albumu' %}selected{% endif %}>Nr albumu</option>
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button class="btn btn-ghost" type="submit">Filtruj</button>
+            {% if q or status_filter or kierunek_filter %}
+                <a class="btn btn-ghost" href="{{ url_for('promotor_studenci') }}">Wyczyść</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{% if studenci %}
+<div class="panel" style="padding:0;">
+    <div class="table-scroll">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Nr albumu</th>
+                <th>Kierunek</th>
+                <th>Praktyki</th>
+                <th>Status aktywnej</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in studenci %}
+            {% set s = row.student %}
+            {% set pp = row.praktyki %}
+            {% set aktywna = pp | selectattr('status', 'in', ['zgloszona','zaakceptowana','w_trakcie','do_oceny']) | list | first %}
+            <tr>
+                <td>
+                    <strong>{{ s.pelne_imie }}</strong>
+                    <br><small style="color:var(--muted);">{{ s.email }}</small>
+                </td>
+                <td>{{ s.nr_albumu or '—' }}</td>
+                <td>{{ s.kierunek or '—' }}</td>
+                <td>{{ pp|length }}</td>
+                <td>
+                    {% if aktywna %}
+                        <span class="badge badge-{{ aktywna.status }}">{{ aktywna.status_label }}</span>
+                    {% else %}
+                        <span style="color:var(--muted);font-size:13px;">brak aktywnej</span>
+                    {% endif %}
+                </td>
+                <td style="white-space:nowrap;">
+                    <a class="btn btn-ghost btn-sm" href="{{ url_for('promotor_student', student_id=s.id) }}">Szczegóły</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    {% if pagination and pagination.pages > 1 %}
+    {% set base_args = {'q': q, 'status': status_filter, 'kierunek': kierunek_filter, 'sort': sort_by} %}
+    <div class="pagination-bar">
+        <span style="color:var(--muted);">
+            Strona {{ pagination.page }} z {{ pagination.pages }}
+            ({{ pagination.total }})
+        </span>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            {% if pagination.has_prev %}
+                <a class="btn btn-ghost btn-sm"
+                   href="{{ url_for('promotor_studenci', page=pagination.prev_num, **base_args) }}">&lsaquo; Poprzednia</a>
+            {% endif %}
+            {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if p %}
+                    <a class="btn btn-sm {% if p == pagination.page %}btn-primary{% else %}btn-ghost{% endif %}"
+                       href="{{ url_for('promotor_studenci', page=p, **base_args) }}">{{ p }}</a>
+                {% else %}
+                    <span style="padding:0 6px;color:var(--muted);">…</span>
+                {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+                <a class="btn btn-ghost btn-sm"
+                   href="{{ url_for('promotor_studenci', page=pagination.next_num, **base_args) }}">Następna &rsaquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="panel">
+    <div class="empty">
+        {% if q or status_filter or kierunek_filter %}
+            <h3>Brak wyników</h3>
+            <p>Żaden student nie spełnia podanych kryteriów.</p>
+            <a class="btn btn-ghost" href="{{ url_for('promotor_studenci') }}">Wyczyść filtry</a>
+        {% else %}
+            <h3>Brak podopiecznych</h3>
+            <p>Żaden student nie przypisał Cię jeszcze jako opiekuna.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

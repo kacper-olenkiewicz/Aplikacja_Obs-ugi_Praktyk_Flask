@@ -1,0 +1,113 @@
+{% extends "admin/_layout.html" %}
+{% set nav = 'user_new' if not u else 'users' %}
+{% block title %}{{ 'Nowy użytkownik' if not u else 'Edycja: ' ~ u.pelne_imie }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ 'Nowy użytkownik' if not u else 'Edycja użytkownika' }}</h1>
+        {% if u %}
+            <p class="muted">ID: {{ u.id }} · utworzono {{ u.created_at|pl_date }}</p>
+        {% endif %}
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('admin_users') }}">← Użytkownicy</a>
+</div>
+
+<form method="post">
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+<div>
+
+<div class="panel">
+    <h2>Dane osobowe</h2>
+    <div class="form-grid">
+        <div class="field">
+            <label>Imię</label>
+            <input name="imie" value="{{ u.imie if u else '' }}">
+        </div>
+        <div class="field">
+            <label>Nazwisko</label>
+            <input name="nazwisko" value="{{ u.nazwisko if u else '' }}">
+        </div>
+        <div class="field full">
+            <label>E-mail <span class="req">*</span></label>
+            <input type="email" name="email" value="{{ u.email if u else '' }}" required>
+        </div>
+        <div class="field">
+            <label>Telefon</label>
+            <input name="telefon" value="{{ u.telefon if u else '' }}">
+        </div>
+        <div class="field full">
+            <label>Adres</label>
+            <input name="adres" value="{{ u.adres if u else '' }}">
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Dane studenckie</h2>
+    <div class="form-grid">
+        <div class="field">
+            <label>Nr albumu</label>
+            <input name="nr_albumu" value="{{ u.nr_albumu if u else '' }}">
+        </div>
+        <div class="field">
+            <label>Rok studiów</label>
+            <input type="number" min="1" max="4" name="rok_studiow" value="{{ u.rok_studiow if u else '' }}">
+        </div>
+        <div class="field">
+            <label>Semestr</label>
+            <input type="number" min="1" max="8" name="semestr" value="{{ u.semestr if u else '' }}">
+        </div>
+        <div class="field full">
+            <label>Kierunek</label>
+            <input name="kierunek" value="{{ u.kierunek if u else '' }}">
+        </div>
+    </div>
+</div>
+
+</div>
+<div>
+
+<div class="panel" style="border-color:var(--ans-red);">
+    <h2>Rola i dostęp</h2>
+    <div class="field">
+        <label>Rola <span class="req">*</span></label>
+        <select name="rola" {% if u and u.id == current_user_obj.id %}disabled{% endif %}>
+            <option value="student"  {% if (u and u.rola=='student')  or not u %}selected{% endif %}>Student</option>
+            <option value="promotor" {% if u and u.rola=='promotor' %}selected{% endif %}>Promotor (opiekun UOPZ)</option>
+            <option value="root"     {% if u and u.rola=='root'     %}selected{% endif %}>Administrator (root)</option>
+        </select>
+        {% if u and u.id == current_user_obj.id %}
+            <input type="hidden" name="rola" value="{{ u.rola }}">
+            <p class="hint" style="color:var(--muted);">Nie możesz zmienić własnej roli.</p>
+        {% endif %}
+    </div>
+
+    {% if not u %}
+    <div style="margin-top:12px;padding:10px;background:var(--bg-alt, #f5f5f5);border-radius:6px;font-size:13px;color:var(--muted);">
+        Konto zostanie utworzone z tymczasowym identyfikatorem MS. Użytkownik po zalogowaniu przez Microsoft przejmie to konto automatycznie (po dopasowaniu po adresie e-mail).
+    </div>
+    {% endif %}
+</div>
+
+{% if u %}
+<div class="panel">
+    <h2>Statystyki</h2>
+    <dl class="kv" style="font-size:13px;grid-template-columns:130px 1fr;">
+        <dt>Praktyki</dt><dd>{{ u.praktyki.count() }}</dd>
+        <dt>Ostatnie logowanie</dt><dd>{{ u.last_login_at|pl_date if u.last_login_at else '—' }}</dd>
+        <dt>Konto od</dt><dd>{{ u.created_at|pl_date }}</dd>
+    </dl>
+</div>
+{% endif %}
+
+</div>
+</div>
+
+<div class="form-actions">
+    <a class="btn btn-ghost" href="{{ url_for('admin_users') }}">Anuluj</a>
+    <button class="btn btn-primary" type="submit">
+        {{ 'Utwórz użytkownika' if not u else 'Zapisz zmiany' }}
+    </button>
+</div>
+</form>
+{% endblock %}

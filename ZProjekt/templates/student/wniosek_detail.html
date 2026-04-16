@@ -1,0 +1,119 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'wnioski' %}
+{% block title %}Wniosek — {{ w.pracodawca_nazwa }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ w.pracodawca_nazwa }}</h1>
+        <p class="muted">
+            <span class="badge badge-{{ w.status }}">{{ w.status_label }}</span>
+            · {{ w.typ_label }} · złożony {{ w.created_at|pl_date }}
+        </p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('wnioski_list') }}">← Wnioski</a>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+<div>
+
+<div class="panel">
+    <h2>Dane wniosku</h2>
+    <dl class="kv">
+        <dt>Typ</dt><dd>{{ w.typ_label }}</dd>
+        <dt>Pracodawca</dt><dd>{{ w.pracodawca_nazwa }}</dd>
+        <dt>Adres</dt><dd>{{ w.pracodawca_adres or '—' }}</dd>
+        <dt>NIP / CEIDG / KRS</dt><dd>{{ w.nr_rejestrowy or '—' }}</dd>
+        <dt>Stanowisko</dt><dd>{{ w.stanowisko or '—' }}</dd>
+        <dt>Okres</dt>
+        <dd>
+            {{ w.data_od|pl_date if w.data_od else '—' }}
+            {% if w.data_od and w.data_do %} – {{ w.data_do|pl_date }}{% endif %}
+        </dd>
+        <dt>Zakres obowiązków</dt>
+        <dd>{{ w.opis_obowiazkow|replace('\n','<br>')|safe if w.opis_obowiazkow else '—' }}</dd>
+        <dt>Uzasadnienie</dt>
+        <dd>{{ w.uzasadnienie|replace('\n','<br>')|safe if w.uzasadnienie else '—' }}</dd>
+    </dl>
+</div>
+
+{% if w.ocena_komisji or w.decyzja_dyrektora %}
+<div class="panel">
+    <h2>Przebieg rozpatrywania</h2>
+    {% if w.ocena_komisji %}
+    <div style="margin-bottom:12px;">
+        <strong>Ocena komisji ({{ w.data_oceny_komisji|pl_date }}):</strong>
+        <span style="color:{% if w.ocena_komisji=='pozytywna' %}var(--ans-red){% else %}#666{% endif %};font-weight:600;">
+            {{ w.ocena_komisji|capitalize }}
+        </span>
+        {% if w.komentarz_komisji %}
+            <p style="margin:6px 0 0;font-size:13px;">{{ w.komentarz_komisji|replace('\n','<br>')|safe }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% if w.decyzja_dyrektora %}
+    <div>
+        <strong>Decyzja dyrektora ({{ w.data_decyzji|pl_date }}):</strong>
+        <span style="color:{% if w.decyzja_dyrektora=='zatwierdzona' %}var(--ans-red){% else %}#666{% endif %};font-weight:600;">
+            {{ w.decyzja_dyrektora|capitalize }}
+        </span>
+        {% if w.komentarz_dyrektora %}
+            <p style="margin:6px 0 0;font-size:13px;">{{ w.komentarz_dyrektora|replace('\n','<br>')|safe }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+</div>
+<div>
+
+<div class="panel">
+    <h2>Dokumenty</h2>
+    <p class="muted" style="font-size:13px;margin:0 0 10px;">
+        Zaświadczenie o zatrudnieniu, zakres obowiązków, CEIDG/KRS itp.
+    </p>
+    {% if w.dokumenty.count() %}
+        {% for d in w.dokumenty.order_by(false()) %}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;">
+            <div>
+                <div>{{ d.nazwa_oryginalna }}</div>
+                <div style="color:var(--muted);">{{ d.typ_label }}</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <a class="btn btn-ghost btn-sm"
+                   href="{{ url_for('wniosek_pobierz_dok', wniosek_id=w.id, dok_id=d.id) }}">Pobierz</a>
+                {% if w.status in ('zlozony', 'w_ocenie_komisji') %}
+                <form method="post" action="{{ url_for('wniosek_usun_dok', wniosek_id=w.id, dok_id=d.id) }}" class="inline">
+                    <button class="btn btn-danger btn-sm" type="submit">Usuń</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="muted" style="font-size:13px;margin:0 0 12px;">Brak dokumentów.</p>
+    {% endif %}
+
+    {% if w.status in ('zlozony', 'w_ocenie_komisji') %}
+    <form method="post" action="{{ url_for('wniosek_dodaj_dok', wniosek_id=w.id) }}"
+          enctype="multipart/form-data" style="margin-top:12px;">
+        <div class="field" style="margin-bottom:8px;">
+            <label style="font-size:13px;">Typ dokumentu</label>
+            <select name="typ">
+                <option value="zatrudnienie">Zaświadczenie o zatrudnieniu</option>
+                <option value="zakres_obowiazkow">Zakres obowiązków</option>
+                <option value="ceidg_krs">CEIDG / KRS</option>
+                <option value="inne">Inne</option>
+            </select>
+        </div>
+        <div class="field" style="margin-bottom:8px;">
+            <input type="file" name="plik" accept=".pdf,.doc,.docx,.odt,.jpg,.jpeg,.png">
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit">Dodaj dokument</button>
+    </form>
+    {% endif %}
+</div>
+
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+# ───────── Python ─────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.Python
+build/
+dist/
+wheels/
+.eggs/
+pip-wheel-metadata/
+
+# ───────── Virtualenv ─────────
+venv/
+.venv/
+env/
+ENV/
+
+# ───────── Sekrety / konfiguracja lokalna ─────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ───────── Flask / aplikacja ─────────
+instance/
+.webassets-cache
+*.log
+logs/
+
+# Dane użytkowników wgrywane przez aplikację — nie wchodzą do repo
+uploads/*
+!uploads/.gitkeep
+
+# ───────── Migracje ─────────
+# migracje (pliki wersji) JEST commitowane,
+# ale cache aplikacji Alembica nie
+migrations/__pycache__/
+migrations/versions/__pycache__/
+
+# ───────── Fonty (licencje!) ─────────
+# Arial jest własnością Monotype — nie commituj binariów TTF
+static/fonts/*.ttf
+static/fonts/*.otf
+!static/fonts/README.txt
+
+# ───────── Bazy lokalne / kopie ─────────
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+
+# ───────── IDE / edytory ─────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# ───────── Narzędzia pokrycia / testy ─────────
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage.xml
+*.cover
+
+# ───────── OS ─────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ───────── Jupyter / tymczasowe ─────────
+.ipynb_checkpoints/
+*.bak
+*.tmp
+*.orig
+
+# ───────── Claude / narzędzia ─────────
+.claude/
+
+PlikiPraktyka/

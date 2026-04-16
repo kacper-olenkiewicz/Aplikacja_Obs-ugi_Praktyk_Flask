@@ -1,0 +1,57 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'profil' %}
+{% block title %}Mój profil · Praktyki ANS{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Mój profil</h1>
+        <p class="muted">Dane widoczne na dokumentach praktyki. Uzupełnij je przed pierwszym zgłoszeniem.</p>
+    </div>
+</div>
+
+<div class="panel">
+    <form method="post">
+        <div class="form-grid">
+            <div class="field">
+                <label>Imię <span class="req">*</span></label>
+                <input name="imie" value="{{ user.imie or '' }}" required>
+            </div>
+            <div class="field">
+                <label>Nazwisko <span class="req">*</span></label>
+                <input name="nazwisko" value="{{ user.nazwisko or '' }}" required>
+            </div>
+            <div class="field">
+                <label>E-mail uczelniany</label>
+                <input value="{{ user.email }}" disabled>
+            </div>
+            <div class="field">
+                <label>Telefon</label>
+                <input name="telefon" value="{{ user.telefon or '' }}">
+            </div>
+            <div class="field">
+                <label>Numer albumu</label>
+                <input name="nr_albumu" value="{{ user.nr_albumu or '' }}">
+            </div>
+            <div class="field">
+                <label>Kierunek studiów</label>
+                <input name="kierunek" value="{{ user.kierunek or '' }}">
+            </div>
+            <div class="field">
+                <label>Rok studiów</label>
+                <input type="number" min="1" max="6" name="rok_studiow" value="{{ user.rok_studiow or '' }}">
+            </div>
+            <div class="field">
+                <label>Semestr</label>
+                <input type="number" min="1" max="12" name="semestr" value="{{ user.semestr or '' }}">
+            </div>
+            <div class="field full">
+                <label>Adres zamieszkania</label>
+                <input name="adres" value="{{ user.adres or '' }}">
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Zapisz profil</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

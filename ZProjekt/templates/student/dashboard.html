@@ -1,0 +1,88 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'dashboard' %}
+{% block title %}Panel · Praktyki ANS{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Panel studenta</h1>
+        <p class="muted">Zarządzaj praktykami, dziennikiem i dokumentami w jednym miejscu.</p>
+    </div>
+    <div><a class="btn btn-primary" href="{{ url_for('praktyka_nowa') }}">+ Zgłoś nową praktykę</a></div>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <div class="label">Aktywne praktyki</div>
+        <div class="value">{{ aktywne|length }}</div>
+        <div class="hint">łącznie zgłoszeń: {{ praktyki|length }}</div>
+    </div>
+    <div class="stat">
+        <div class="label">Wpisy dziennika</div>
+        <div class="value">{{ liczba_wpisow }}</div>
+        <div class="hint">suma godzin: {{ '%.1f'|format(total_godzin) }}</div>
+    </div>
+    <div class="stat">
+        <div class="label">Dokumenty</div>
+        <div class="value">{{ liczba_dokumentow }}</div>
+        <div class="hint">wgrane pliki</div>
+    </div>
+    <div class="stat">
+        <div class="label">Zakończone</div>
+        <div class="value">{{ zakonczone|length }}</div>
+        <div class="hint">zaliczone / odrzucone</div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-head">
+        <h2>Aktywne praktyki</h2>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('praktyki_list') }}">Wszystkie →</a>
+    </div>
+    {% if aktywne %}
+        <table class="table">
+            <thead>
+                <tr><th>Firma</th><th>Okres</th><th>Promotor</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for p in aktywne %}
+                <tr>
+                    <td><strong>{{ p.firma_nazwa }}</strong></td>
+                    <td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date or '—' }}</td>
+                    <td>{{ p.promotor.pelne_imie if p.promotor else '—' }}</td>
+                    <td><span class="badge badge-{{ p.status }}">{{ p.status_label }}</span></td>
+                    <td><a class="btn btn-ghost btn-sm" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">Otwórz</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">
+            <h3>Brak aktywnych praktyk</h3>
+            <p>Zgłoś swoją pierwszą praktykę, żeby zacząć.</p>
+            <a class="btn btn-primary" href="{{ url_for('praktyka_nowa') }}">+ Zgłoś praktykę</a>
+        </div>
+    {% endif %}
+</div>
+
+{% if zakonczone %}
+<div class="panel">
+    <div class="panel-head"><h2>Zakończone praktyki i oceny</h2></div>
+    <table class="table">
+        <thead>
+            <tr><th>Firma</th><th>Okres</th><th>Promotor</th><th>Ocena</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+        {% for p in zakonczone %}
+            <tr>
+                <td>{{ p.firma_nazwa }}</td>
+                <td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }}</td>
+                <td>{{ p.promotor.pelne_imie if p.promotor else '—' }}</td>
+                <td><strong>{{ p.ocena or '—' }}</strong></td>
+                <td><span class="badge badge-{{ p.status }}">{{ p.status_label }}</span></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}KARTA PRAKTYKI ZAWODOWEJ{% endblock %}
+{% block doc_subtitle %}Załącznik nr 3 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<h2>1. Dane studenta</h2>
+<table class="kv">
+    <tr><td class="k">Imię i nazwisko</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
+    <tr><td class="k">Rok / semestr</td><td>{{ student.rok_studiow or '' }} / {{ student.semestr or '' }}</td></tr>
+    <tr><td class="k">Adres</td><td>{{ student.adres or '' }}</td></tr>
+    <tr><td class="k">Telefon</td><td>{{ student.telefon or '' }}</td></tr>
+    <tr><td class="k">E-mail</td><td>{{ student.email }}</td></tr>
+</table>
+
+<h2>2. Miejsce odbywania praktyki</h2>
+<table class="kv">
+    <tr><td class="k">Nazwa firmy / instytucji</td><td>{{ p.firma_nazwa }}</td></tr>
+    <tr><td class="k">Adres</td><td>{{ p.firma_adres or '' }}</td></tr>
+    <tr><td class="k">NIP</td><td>{{ p.firma_nip or '' }}</td></tr>
+    <tr><td class="k">Opiekun zakładowy</td><td>{{ p.opiekun_zakladowy_imie_nazwisko or '' }}</td></tr>
+    <tr><td class="k">Stanowisko opiekuna</td><td>{{ p.opiekun_zakladowy_stanowisko or '' }}</td></tr>
+    <tr><td class="k">Kontakt do opiekuna</td><td>{{ p.opiekun_zakladowy_kontakt or '' }}</td></tr>
+</table>
+
+<h2>3. Termin praktyki</h2>
+<table class="kv">
+    <tr><td class="k">Data rozpoczęcia</td><td>{{ p.data_od|pl_date }}</td></tr>
+    <tr><td class="k">Data zakończenia</td><td>{{ p.data_do|pl_date }}</td></tr>
+    <tr><td class="k">Liczba godzin</td><td>{{ p.liczba_godzin or '' }}</td></tr>
+</table>
+
+<h2>4. Zakres zadań / program praktyki</h2>
+<div class="block">{{ (p.zakres_zadan or '')|replace('\n','<br>')|safe }}</div>
+
+<h2>5. Promotor uczelniany</h2>
+<table class="kv">
+    <tr><td class="k">Imię i nazwisko</td><td>{{ promotor.pelne_imie if promotor else '' }}</td></tr>
+    <tr><td class="k">E-mail</td><td>{{ promotor.email if promotor else '' }}</td></tr>
+</table>
+
+<table class="sign">
+    <tr>
+        <td>{{ today|pl_date }}<br><span class="small">data i podpis studenta</span></td>
+        <td>&nbsp;<br><span class="small">podpis promotora uczelnianego</span></td>
+    </tr>
+</table>
+{% endblock %}

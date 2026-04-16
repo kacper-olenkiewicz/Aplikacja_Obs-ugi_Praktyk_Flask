@@ -1,0 +1,75 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'wnioski' %}
+{% block title %}Nowy wniosek §4{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wniosek o zaliczenie praktyki</h1>
+        <p class="muted">Zaliczenie na podstawie pracy zawodowej, stażu lub działalności (§4)</p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('wnioski_list') }}">Anuluj</a>
+</div>
+
+<form method="post">
+<div class="panel">
+    <h2>Podstawa zaliczenia</h2>
+    <div class="form-grid">
+        <div class="field full">
+            <label>Typ <span class="req">*</span></label>
+            <select name="typ" required>
+                <option value="">— wybierz —</option>
+                <option value="praca_zawodowa">Praca zawodowa</option>
+                <option value="staz">Staż</option>
+                <option value="dzialalnosc">Działalność gospodarcza</option>
+            </select>
+        </div>
+        <div class="field full">
+            <label>Nazwa pracodawcy / firmy <span class="req">*</span></label>
+            <input name="pracodawca_nazwa" required>
+        </div>
+        <div class="field full">
+            <label>Adres</label>
+            <input name="pracodawca_adres">
+        </div>
+        <div class="field">
+            <label>NIP / CEIDG / KRS</label>
+            <input name="nr_rejestrowy" placeholder="np. 123-456-78-90">
+        </div>
+        <div class="field">
+            <label>Stanowisko</label>
+            <input name="stanowisko">
+        </div>
+        <div class="field">
+            <label>Data rozpoczęcia</label>
+            <input type="date" name="data_od">
+            <p class="hint">Zgodnie z §4.1, możliwe jest zaliczenie działalności z ostatnich 3 lat.</p>
+        </div>
+        <div class="field">
+            <label>Data zakończenia / do kiedy</label>
+            <input type="date" name="data_do">
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Zakres obowiązków i uzasadnienie</h2>
+    <div class="form-grid">
+        <div class="field full">
+            <label>Opis obowiązków <span class="req">*</span></label>
+            <textarea name="opis_obowiazkow" rows="6" required></textarea>
+            <p class="hint">Opisz szczegółowo wykonywane zadania. Muszą pokrywać się z programem praktyki zawodowej.</p>
+        </div>
+        <div class="field full">
+            <label>Uzasadnienie zgodności z programem praktyki</label>
+            <textarea name="uzasadnienie" rows="4"></textarea>
+            <p class="hint">Wyjaśnij, dlaczego Twoje obowiązki pozwoliły osiągnąć zakładane efekty uczenia się.</p>
+        </div>
+    </div>
+</div>
+
+<div class="form-actions">
+    <a class="btn btn-ghost" href="{{ url_for('wnioski_list') }}">Anuluj</a>
+    <button class="btn btn-primary" type="submit">Złóż wniosek</button>
+</div>
+</form>
+{% endblock %}

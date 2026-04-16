@@ -1,0 +1,94 @@
+{% extends "admin/_layout.html" %}
+{% set nav = 'promotorzy' %}
+{% block title %}{{ promotor.pelne_imie }} · Promotor{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ promotor.pelne_imie }}</h1>
+        <p class="muted">
+            {{ promotor.email }}
+            · {{ studenci_map|length }} studentów
+            · {{ liczba_praktyk }} praktyk
+        </p>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a class="btn btn-ghost" href="{{ url_for('admin_user_edit', user_id=promotor.id) }}">Edytuj konto</a>
+        <a class="btn btn-ghost" href="{{ url_for('admin_promotorzy') }}">← Promotorzy</a>
+    </div>
+</div>
+
+{% if studenci_map %}
+    {% for student, praktyki in studenci_map %}
+    <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-head" style="margin-bottom:12px;">
+            <div>
+                <strong>{{ student.pelne_imie }}</strong>
+                {% if student.nr_albumu %}
+                    <span style="font-size:13px;color:var(--muted);"> · nr alb. {{ student.nr_albumu }}</span>
+                {% endif %}
+                {% if student.kierunek %}
+                    <span style="font-size:13px;color:var(--muted);"> · {{ student.kierunek }}</span>
+                {% endif %}
+                {% if student.semestr %}
+                    <span style="font-size:13px;color:var(--muted);"> · sem. {{ student.semestr }}</span>
+                {% endif %}
+            </div>
+            <a class="btn btn-ghost btn-sm"
+               href="{{ url_for('admin_user_edit', user_id=student.id) }}">Edytuj studenta</a>
+        </div>
+
+        {% if praktyki %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Firma</th>
+                    <th>Semestry</th>
+                    <th>Okres</th>
+                    <th>Godziny</th>
+                    <th>Status</th>
+                    <th>Zal. sem. 6</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in praktyki %}
+                <tr>
+                    <td style="font-weight:500;">{{ p.firma_nazwa }}</td>
+                    <td>{{ p.semestr_od or '—' }}–{{ p.semestr_do or '—' }}</td>
+                    <td style="font-size:13px;white-space:nowrap;">
+                        {% if p.data_od %}{{ p.data_od|pl_date }}{% endif %}
+                        {% if p.data_od and p.data_do %} – {% endif %}
+                        {% if p.data_do %}{{ p.data_do|pl_date }}{% endif %}
+                        {% if not p.data_od and not p.data_do %}—{% endif %}
+                    </td>
+                    <td>{{ p.liczba_godzin or '—' }}</td>
+                    <td><span class="badge badge-{{ p.status }}">{{ p.status_label }}</span></td>
+                    <td>
+                        {% if p.zaliczenie_sem6 %}
+                            <span style="color:var(--ans-red);font-weight:600;">Tak</span>
+                            <br><small style="color:var(--muted);">{{ p.data_zaliczenia_sem6|pl_date }}</small>
+                        {% else %}
+                            <span style="color:var(--muted);">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a class="btn btn-ghost btn-sm"
+                           href="{{ url_for('promotor_praktyka', praktyka_id=p.id) }}">
+                            Szczegóły
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="muted" style="margin:0;font-size:13px;">Brak praktyk.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="panel">
+        <p class="muted" style="margin:0;">Ten promotor nie ma jeszcze przypisanych studentów.</p>
+    </div>
+{% endif %}
+{% endblock %}

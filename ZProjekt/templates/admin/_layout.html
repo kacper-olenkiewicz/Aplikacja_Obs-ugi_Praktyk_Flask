@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% set nav = nav|default('users') %}
+{% block body %}
+<div class="app">
+    <aside class="sidebar">
+        <a href="{{ url_for('admin_users') }}" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='logo-ans.png') }}" alt="ANS">
+            <div>
+                <div style="font-weight:600;font-size:14px;">Praktyki</div>
+                <small>Administrator</small>
+            </div>
+        </a>
+
+        <a href="{{ url_for('admin_users') }}" class="sidebar-link {% if nav=='users' %}active{% endif %}">
+            <span class="ico">&#9741;</span> Użytkownicy
+        </a>
+        <a href="{{ url_for('admin_user_new') }}" class="sidebar-link {% if nav=='user_new' %}active{% endif %}">
+            <span class="ico">+</span> Nowy użytkownik
+        </a>
+        <a href="{{ url_for('admin_promotorzy') }}" class="sidebar-link {% if nav=='promotorzy' %}active{% endif %}">
+            <span class="ico">&#9632;</span> Promotorzy
+        </a>
+        <a href="{{ url_for('admin_przedluzenia') }}" class="sidebar-link {% if nav=='przedluzenia' %}active{% endif %}">
+            <span class="ico">&#9633;</span> Przedłużenia
+        </a>
+        <a href="{{ url_for('admin_zmiana_terminu') }}" class="sidebar-link {% if nav=='zmiana_terminu' %}active{% endif %}">
+            <span class="ico">&#9632;</span> Zmiana terminu
+        </a>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 8px;">
+
+        <a href="{{ url_for('promotor_dashboard') }}" class="sidebar-link">
+            <span class="ico">&#9632;</span> Panel opiekuna
+        </a>
+
+        <div class="sidebar-footer">
+            {% if current_user_obj %}
+                <div class="u-name">{{ current_user_obj.pelne_imie }}</div>
+                <div class="u-meta">{{ current_user_obj.email }}</div>
+                <div class="u-meta">Administrator</div>
+                <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="{{ url_for('logout') }}">Wyloguj</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="app-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-wrap">
+            {% for cat, msg in messages %}
+              <div class="flash flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block main %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

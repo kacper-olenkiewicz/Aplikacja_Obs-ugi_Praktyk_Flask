@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% set nav = nav|default('dashboard') %}
+{% block body %}
+<div class="app">
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='logo-ans.png') }}" alt="ANS">
+            <div>
+                <div style="font-weight:600;font-size:14px;">Praktyki</div>
+                <small>ANS Elbląg</small>
+            </div>
+        </a>
+
+        <a href="{{ url_for('dashboard') }}" class="sidebar-link {% if nav=='dashboard' %}active{% endif %}">
+            <span class="ico">&#9632;</span> Panel główny
+        </a>
+        <a href="{{ url_for('praktyki_list') }}" class="sidebar-link {% if nav=='praktyki' %}active{% endif %}">
+            <span class="ico">&#9741;</span> Moje praktyki
+        </a>
+        <a href="{{ url_for('praktyka_nowa') }}" class="sidebar-link {% if nav=='nowa' %}active{% endif %}">
+            <span class="ico">+</span> Nowa praktyka
+        </a>
+        <a href="{{ url_for('profil') }}" class="sidebar-link {% if nav=='profil' %}active{% endif %}">
+            <span class="ico">&#9679;</span> Mój profil
+        </a>
+        <a href="{{ url_for('wnioski_list') }}" class="sidebar-link {% if nav=='wnioski' %}active{% endif %}">
+            <span class="ico">&#9633;</span> Wnioski §4
+        </a>
+        <a href="{{ url_for('zmiana_terminu_list') }}" class="sidebar-link {% if nav=='zmiana_terminu' %}active{% endif %}">
+            <span class="ico">&#9632;</span> Zmiana terminu
+        </a>
+
+        <div class="sidebar-footer">
+            {% if current_user_obj %}
+                <div class="u-name">{{ current_user_obj.pelne_imie }}</div>
+                <div class="u-meta">{{ current_user_obj.email }}</div>
+                <div class="u-meta">Rola: {{ current_user_obj.rola }}</div>
+                <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="{{ url_for('logout') }}">Wyloguj</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="app-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-wrap">
+            {% for cat, msg in messages %}
+              <div class="flash flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block main %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

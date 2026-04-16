@@ -1,0 +1,62 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'zmiana_terminu' %}
+{% block title %}Wniosek o zmianę terminu praktyki{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wniosek o zmianę terminu praktyki</h1>
+        <p class="muted">Pisemny wniosek do Dyrektora Instytutu (§3 Org. pkt 3 i 7)</p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('zmiana_terminu_list') }}">Anuluj</a>
+</div>
+
+<form method="post">
+<div class="panel">
+    <h2>Powód i uzasadnienie</h2>
+    <div class="form-grid">
+        <div class="field full">
+            <label>Powód <span class="req">*</span></label>
+            <select name="powod" required>
+                <option value="">— wybierz —</option>
+                <option value="erasmus">Wyjazd zagraniczny / Erasmus+ (§3 Org. pkt 7)</option>
+                <option value="szczegolny">Szczególnie uzasadniony przypadek (§3 Org. pkt 3)</option>
+            </select>
+        </div>
+        <div class="field full">
+            <label>Uzasadnienie (opis sytuacji) <span class="req">*</span></label>
+            <textarea name="opis" rows="5" required
+                      placeholder="Opisz szczegółowo powód, dla którego wnioskujesz o realizację praktyki w innym terminie."></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Proponowany nowy termin</h2>
+    <p class="hint" style="margin-bottom:12px;">
+        Uwaga: zmiana terminu nie zwalnia studenta z uczestnictwa w zajęciach przewidzianych w programie studiów.
+    </p>
+    <div class="form-grid">
+        <div class="field">
+            <label>Proponowany semestr realizacji</label>
+            <input type="number" name="proponowany_semestr" min="1" max="7"
+                   placeholder="np. 6">
+        </div>
+        <div class="field"></div>
+        <div class="field">
+            <label>Proponowana data rozpoczęcia</label>
+            <input type="date" name="proponowana_data_od">
+        </div>
+        <div class="field">
+            <label>Proponowana data zakończenia</label>
+            <input type="date" name="proponowana_data_do">
+            <p class="hint">Praktyka musi zakończyć się do połowy lutego (§3 Org. pkt 2).</p>
+        </div>
+    </div>
+</div>
+
+<div class="form-actions">
+    <a class="btn btn-ghost" href="{{ url_for('zmiana_terminu_list') }}">Anuluj</a>
+    <button class="btn btn-primary" type="submit">Złóż wniosek</button>
+</div>
+</form>
+{% endblock %}

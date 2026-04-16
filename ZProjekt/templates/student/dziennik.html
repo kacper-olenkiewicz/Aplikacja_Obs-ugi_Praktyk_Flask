@@ -1,0 +1,83 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'praktyki' %}
+{% block title %}Dziennik · {{ p.firma_nazwa }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Dziennik praktyki</h1>
+        <p class="muted">{{ p.firma_nazwa }} · {{ p.data_od|pl_date }} – {{ p.data_do|pl_date or '—' }}</p>
+    </div>
+    <div>
+        <a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">← Powrót</a>
+        <a class="btn btn-secondary" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Pobierz PDF</a>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Dodaj wpis</h2>
+    <form method="post">
+        <div class="form-grid">
+            <div class="field">
+                <label>Data <span class="req">*</span></label>
+                <input type="date" name="data" required>
+            </div>
+            <div class="field">
+                <label>Godzina od</label>
+                <input type="time" name="godz_od">
+            </div>
+            <div class="field">
+                <label>Godzina do</label>
+                <input type="time" name="godz_do">
+            </div>
+            <div class="field full">
+                <label>Opis czynności <span class="req">*</span></label>
+                <textarea name="opis" rows="3" required></textarea>
+            </div>
+            <div class="field full">
+                <label>Efekty / uzyskane umiejętności</label>
+                <textarea name="efekty" rows="2"></textarea>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">+ Dodaj wpis</button>
+        </div>
+    </form>
+</div>
+
+<div class="panel">
+    <div class="panel-head">
+        <h2>Wpisy ({{ wpisy|length }})</h2>
+        <div class="muted" style="font-size:14px;">Suma godzin: <strong>{{ '%.1f'|format(suma_godzin) }}</strong></div>
+    </div>
+    {% if wpisy %}
+        <table class="table">
+            <thead>
+                <tr><th>Data</th><th>Godziny</th><th>Opis czynności</th><th>Efekty</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for w in wpisy %}
+                <tr>
+                    <td>{{ w.data|pl_date }}</td>
+                    <td>
+                        {% if w.godz_od %}{{ w.godz_od|pl_time }}–{{ w.godz_do|pl_time }}{% endif %}
+                        {% if w.liczba_godzin %}<br><small style="color:var(--muted)">{{ w.liczba_godzin }}h</small>{% endif %}
+                    </td>
+                    <td style="max-width:360px;">{{ w.opis }}</td>
+                    <td style="max-width:240px;color:var(--muted);">{{ w.efekty or '' }}</td>
+                    <td>
+                        <form method="post" class="inline" action="{{ url_for('dziennik_usun', praktyka_id=p.id, wpis_id=w.id) }}" onsubmit="return confirm('Usunąć wpis?');">
+                            <button class="btn btn-danger btn-sm" type="submit">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">
+            <h3>Brak wpisów</h3>
+            <p>Dodaj pierwszy wpis po wykonanej dniówce praktyki.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

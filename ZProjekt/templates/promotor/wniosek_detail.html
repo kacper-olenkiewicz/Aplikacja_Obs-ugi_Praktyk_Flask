@@ -1,0 +1,148 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'wnioski' %}
+{% block title %}Wniosek — {{ w.pracodawca_nazwa }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ w.pracodawca_nazwa }}</h1>
+        <p class="muted">
+            <span class="badge badge-{{ w.status }}">{{ w.status_label }}</span>
+            · {{ w.student.pelne_imie }}
+            {% if w.student.nr_albumu %} · nr alb. {{ w.student.nr_albumu }}{% endif %}
+        </p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('promotor_wnioski') }}">← Wnioski</a>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+<div>
+
+<div class="panel">
+    <h2>Dane wniosku</h2>
+    <dl class="kv">
+        <dt>Typ</dt><dd>{{ w.typ_label }}</dd>
+        <dt>Pracodawca</dt><dd>{{ w.pracodawca_nazwa }}</dd>
+        <dt>Adres</dt><dd>{{ w.pracodawca_adres or '—' }}</dd>
+        <dt>NIP / CEIDG / KRS</dt><dd>{{ w.nr_rejestrowy or '—' }}</dd>
+        <dt>Stanowisko</dt><dd>{{ w.stanowisko or '—' }}</dd>
+        <dt>Okres</dt>
+        <dd>
+            {{ w.data_od|pl_date if w.data_od else '—' }}
+            {% if w.data_od and w.data_do %} – {{ w.data_do|pl_date }}{% endif %}
+        </dd>
+        <dt>Zakres obowiązków</dt>
+        <dd>{{ w.opis_obowiazkow|replace('\n','<br>')|safe if w.opis_obowiazkow else '—' }}</dd>
+        <dt>Uzasadnienie</dt>
+        <dd>{{ w.uzasadnienie|replace('\n','<br>')|safe if w.uzasadnienie else '—' }}</dd>
+    </dl>
+</div>
+
+{% if w.dokumenty.count() %}
+<div class="panel">
+    <h2>Dokumenty studenta</h2>
+    <table class="table">
+        <thead><tr><th>Plik</th><th>Typ</th><th></th></tr></thead>
+        <tbody>
+        {% for d in w.dokumenty.order_by(false()) %}
+            <tr>
+                <td>{{ d.nazwa_oryginalna }}</td>
+                <td>{{ d.typ_label }}</td>
+                <td>
+                    <a class="btn btn-ghost btn-sm"
+                       href="{{ url_for('wniosek_pobierz_dok', wniosek_id=w.id, dok_id=d.id) }}">Pobierz</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+</div>
+<div>
+
+{% if w.status in ('zlozony', 'w_ocenie_komisji') %}
+<div class="panel" style="border-color:var(--ans-red);">
+    <h2>Ocena merytoryczna komisji</h2>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+        Oceń czy zakres obowiązków studenta jest zgodny z programem praktyki zawodowej i pozwala osiągnąć zakładane efekty uczenia się.
+    </p>
+    <form method="post">
+        <div class="field" style="margin-bottom:12px;">
+            <label>Komentarz komisji</label>
+            <textarea name="komentarz" rows="4">{{ w.komentarz_komisji or '' }}</textarea>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary" type="submit" name="akcja" value="ocen_pozytywnie">
+                Ocena pozytywna — przekaż do dyrektora
+            </button>
+            <button class="btn btn-danger" type="submit" name="akcja" value="ocen_negatywnie"
+                    onclick="return confirm('Odrzucić wniosek negatywną oceną?');">
+                Ocena negatywna — odrzuć wniosek
+            </button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{% if w.status == 'u_dyrektora' and current_user_obj.rola == 'root' %}
+<div class="panel" style="border-color:var(--ans-red);">
+    <h2>Decyzja dyrektora</h2>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+        Komisja wystawiła ocenę pozytywną. Podejmij ostateczną decyzję.
+    </p>
+    <form method="post" action="{{ url_for('admin_wniosek_decyzja', wniosek_id=w.id) }}">
+        <div class="field" style="margin-bottom:12px;">
+            <label>Komentarz dyrektora</label>
+            <textarea name="komentarz" rows="3"></textarea>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary" type="submit" name="akcja" value="zatwierdz">
+                Zatwierdź — zalicz praktykę
+            </button>
+            <button class="btn btn-danger" type="submit" name="akcja" value="odrzuc"
+                    onclick="return confirm('Odrzucić wniosek?');">
+                Odrzuć
+            </button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{% if w.ocena_komisji or w.decyzja_dyrektora %}
+<div class="panel">
+    <h2>Historia decyzji</h2>
+    {% if w.ocena_komisji %}
+        <p style="font-size:13px;margin:0 0 6px;">
+            <strong>Komisja ({{ w.data_oceny_komisji|pl_date }}):</strong>
+            {{ w.ocena_komisji|capitalize }}
+        </p>
+        {% if w.komentarz_komisji %}
+            <p style="font-size:13px;margin:0 0 10px;color:var(--muted);">{{ w.komentarz_komisji }}</p>
+        {% endif %}
+    {% endif %}
+    {% if w.decyzja_dyrektora %}
+        <p style="font-size:13px;margin:0 0 6px;">
+            <strong>Dyrektor ({{ w.data_decyzji|pl_date }}):</strong>
+            {{ w.decyzja_dyrektora|capitalize }}
+        </p>
+        {% if w.komentarz_dyrektora %}
+            <p style="font-size:13px;margin:0;color:var(--muted);">{{ w.komentarz_dyrektora }}</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="panel">
+    <h2>Dane studenta</h2>
+    <dl class="kv" style="font-size:13px;grid-template-columns:100px 1fr;">
+        <dt>Imię i nazwisko</dt><dd>{{ w.student.pelne_imie }}</dd>
+        <dt>E-mail</dt><dd>{{ w.student.email }}</dd>
+        <dt>Nr albumu</dt><dd>{{ w.student.nr_albumu or '—' }}</dd>
+        <dt>Kierunek</dt><dd>{{ w.student.kierunek or '—' }}</dd>
+    </dl>
+</div>
+
+</div>
+</div>
+{% endblock %}

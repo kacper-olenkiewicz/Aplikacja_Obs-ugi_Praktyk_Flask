@@ -1,0 +1,28 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}SPRAWOZDANIE Z PRAKTYKI ZAWODOWEJ{% endblock %}
+{% block doc_subtitle %}Załącznik nr 7 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<table class="kv">
+    <tr><td class="k">Student</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">Kierunek / rok / semestr</td><td>{{ student.kierunek or '' }} · {{ student.rok_studiow or '' }} / {{ student.semestr or '' }}</td></tr>
+    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</td></tr>
+    <tr><td class="k">Termin</td><td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }} ({{ p.liczba_godzin or '' }} h)</td></tr>
+    <tr><td class="k">Opiekun zakładowy</td><td>{{ p.opiekun_zakladowy_imie_nazwisko or '' }}</td></tr>
+    <tr><td class="k">Promotor uczelniany</td><td>{{ promotor.pelne_imie if promotor else '' }}</td></tr>
+</table>
+
+<h2>Opis przebiegu praktyki</h2>
+<div class="block">{{ (p.sprawozdanie_tresc or '')|replace('\n','<br>')|safe }}</div>
+
+<h2>Wnioski</h2>
+<div class="block">{{ (p.sprawozdanie_wnioski or '')|replace('\n','<br>')|safe }}</div>
+
+<table class="sign">
+    <tr>
+        <td>{{ today|pl_date }}<br><span class="small">podpis studenta</span></td>
+        <td>&nbsp;<br><span class="small">podpis promotora</span></td>
+    </tr>
+</table>
+{% endblock %}

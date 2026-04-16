@@ -1,0 +1,49 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'praktyki' %}
+{% block title %}Moje praktyki{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Moje praktyki</h1>
+        <p class="muted">Lista wszystkich zgłoszonych i zrealizowanych praktyk zawodowych.</p>
+    </div>
+    <div><a class="btn btn-primary" href="{{ url_for('praktyka_nowa') }}">+ Zgłoś praktykę</a></div>
+</div>
+
+<div class="panel">
+{% if praktyki %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Firma</th>
+                <th>Okres</th>
+                <th>Godz.</th>
+                <th>Promotor</th>
+                <th>Ocena</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in praktyki %}
+            <tr>
+                <td><strong>{{ p.firma_nazwa }}</strong><br><small style="color:var(--muted)">{{ p.firma_adres or '' }}</small></td>
+                <td>{{ p.data_od|pl_date or '—' }}<br><small style="color:var(--muted)">{{ p.data_do|pl_date or '' }}</small></td>
+                <td>{{ p.liczba_godzin or '—' }}</td>
+                <td>{{ p.promotor.pelne_imie if p.promotor else '—' }}</td>
+                <td><strong>{{ p.ocena or '—' }}</strong></td>
+                <td><span class="badge badge-{{ p.status }}">{{ p.status_label }}</span></td>
+                <td><a class="btn btn-ghost btn-sm" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">Otwórz</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty">
+        <h3>Brak praktyk</h3>
+        <p>Zgłoś pierwszą praktykę zawodową, aby rozpocząć rozliczanie.</p>
+        <a class="btn btn-primary" href="{{ url_for('praktyka_nowa') }}">+ Zgłoś praktykę</a>
+    </div>
+{% endif %}
+</div>
+{% endblock %}

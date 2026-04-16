@@ -1,0 +1,77 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'studenci' %}
+{% block title %}{{ student.pelne_imie }} · Praktyki ANS{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ student.pelne_imie }}</h1>
+        <p class="muted">
+            {% if student.nr_albumu %}Nr albumu: {{ student.nr_albumu }} · {% endif %}
+            {{ student.email }}
+        </p>
+    </div>
+    <div>
+        <a class="btn btn-ghost" href="{{ url_for('promotor_studenci') }}">← Podopieczni</a>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 260px;gap:20px;">
+<div>
+
+{% if praktyki %}
+{% for p in praktyki %}
+<div class="panel">
+    <div class="panel-head">
+        <div>
+            <strong style="font-size:16px;">{{ p.firma_nazwa }}</strong>
+            <span class="badge badge-{{ p.status }}" style="margin-left:10px;">{{ p.status_label }}</span>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('promotor_praktyka', praktyka_id=p.id) }}">
+            {% if p.status in ('zgloszona', 'do_oceny') %}Rozpatrz{% else %}Podgląd{% endif %}
+        </a>
+    </div>
+    <dl class="kv" style="font-size:13px;">
+        <dt>Adres</dt><dd>{{ p.firma_adres or '—' }}</dd>
+        <dt>Okres</dt><dd>{{ p.data_od|pl_date or '—' }} – {{ p.data_do|pl_date or '—' }}</dd>
+        <dt>Liczba godzin</dt><dd>{{ p.liczba_godzin or '—' }}</dd>
+        <dt>Opiekun zakładowy</dt>
+        <dd>
+            {{ p.opiekun_zakladowy_imie_nazwisko or '—' }}
+            {% if p.opiekun_zakladowy_stanowisko %}
+                <span style="color:var(--muted);">({{ p.opiekun_zakladowy_stanowisko }})</span>
+            {% endif %}
+        </dd>
+        <dt>Dziennik</dt><dd>{{ p.wpisy_dziennika.count() }} wpisów</dd>
+        <dt>Dokumenty</dt><dd>{{ p.dokumenty.count() }} plików</dd>
+        {% if p.ocena %}<dt>Ocena</dt><dd><strong>{{ p.ocena }}</strong></dd>{% endif %}
+    </dl>
+</div>
+{% endfor %}
+{% else %}
+<div class="panel">
+    <div class="empty">
+        <h3>Brak praktyk</h3>
+        <p>Ten student nie ma jeszcze żadnych zgłoszeń przypisanych do Ciebie.</p>
+    </div>
+</div>
+{% endif %}
+
+</div>
+<div>
+
+<div class="panel">
+    <h2>Dane studenta</h2>
+    <dl class="kv" style="font-size:13px;grid-template-columns:110px 1fr;">
+        <dt>Imię i nazwisko</dt><dd>{{ student.pelne_imie }}</dd>
+        <dt>E-mail</dt><dd>{{ student.email }}</dd>
+        <dt>Nr albumu</dt><dd>{{ student.nr_albumu or '—' }}</dd>
+        <dt>Kierunek</dt><dd>{{ student.kierunek or '—' }}</dd>
+        <dt>Rok studiów</dt><dd>{{ student.rok_studiow or '—' }}</dd>
+        <dt>Semestr</dt><dd>{{ student.semestr or '—' }}</dd>
+        <dt>Telefon</dt><dd>{{ student.telefon or '—' }}</dd>
+    </dl>
+</div>
+
+</div>
+</div>
+{% endblock %}

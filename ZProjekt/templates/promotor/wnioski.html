@@ -1,0 +1,47 @@
+{% extends "promotor/_layout.html" %}
+{% set nav = 'wnioski' %}
+{% block title %}Wnioski §4{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wnioski o zaliczenie praktyki (§4)</h1>
+        <p class="muted">Zaliczenie na podstawie pracy / stażu / działalności</p>
+    </div>
+</div>
+
+{% if wnioski %}
+<div class="panel" style="padding:0;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Pracodawca</th>
+                <th>Typ</th>
+                <th>Data złożenia</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for w in wnioski %}
+            <tr>
+                <td>{{ w.student.pelne_imie }}</td>
+                <td style="font-weight:500;">{{ w.pracodawca_nazwa }}</td>
+                <td style="font-size:13px;">{{ w.typ_label }}</td>
+                <td style="font-size:13px;color:var(--muted);">{{ w.created_at|pl_date }}</td>
+                <td><span class="badge badge-{{ w.status }}">{{ w.status_label }}</span></td>
+                <td>
+                    <a class="btn btn-ghost btn-sm"
+                       href="{{ url_for('promotor_wniosek', wniosek_id=w.id) }}">Rozpatrz</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="panel">
+    <p class="muted" style="margin:0;">Brak wniosków.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'nowa' if not p else 'praktyki' %}
+{% block title %}{{ 'Nowa praktyka' if not p else 'Edycja praktyki' }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>{{ 'Zgłoś nową praktykę' if not p else 'Edycja praktyki' }}</h1>
+        <p class="muted">Wypełnij dane miejsca praktyki i terminy. Te informacje trafią na kartę praktyki.</p>
+    </div>
+    {% if p %}
+        <div><a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">Anuluj</a></div>
+    {% endif %}
+</div>
+
+<form method="post">
+<div class="panel">
+    <h2>Miejsce praktyki</h2>
+    <div class="form-grid">
+        <div class="field full">
+            <label>Nazwa firmy / instytucji <span class="req">*</span></label>
+            <input name="firma_nazwa" value="{{ p.firma_nazwa if p else '' }}" required>
+        </div>
+        <div class="field full">
+            <label>Adres</label>
+            <input name="firma_adres" value="{{ p.firma_adres if p else '' }}">
+        </div>
+        <div class="field">
+            <label>NIP</label>
+            <input name="firma_nip" value="{{ p.firma_nip if p else '' }}">
+        </div>
+        <div class="field full">
+            <label>Profil działalności</label>
+            <input name="firma_profil" value="{{ p.firma_profil if p else '' }}"
+                   placeholder="np. analiza danych, systemy informatyczne, uczenie maszynowe">
+            <p class="hint">Obszar działalności zgodny z kierunkiem: inżynieria danych, AI, systemy informatyczne lub pokrewne. (§3.2)</p>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Opiekun zakładowy</h2>
+    <div class="form-grid">
+        <div class="field">
+            <label>Imię i nazwisko</label>
+            <input name="opiekun_zakladowy_imie_nazwisko" value="{{ p.opiekun_zakladowy_imie_nazwisko if p else '' }}">
+        </div>
+        <div class="field">
+            <label>Stanowisko</label>
+            <input name="opiekun_zakladowy_stanowisko" value="{{ p.opiekun_zakladowy_stanowisko if p else '' }}">
+        </div>
+        <div class="field full">
+            <label>Kontakt (e-mail / telefon)</label>
+            <input name="opiekun_zakladowy_kontakt" value="{{ p.opiekun_zakladowy_kontakt if p else '' }}">
+        </div>
+        <div class="field full">
+            <label>Wykształcenie / kwalifikacje ZOPZ</label>
+            <input name="opiekun_zakladowy_wyksztalcenie"
+                   value="{{ p.opiekun_zakladowy_wyksztalcenie if p else '' }}"
+                   placeholder="np. mgr inż. informatyki, inżynier automatyki">
+            <p class="hint">Regulamin wymaga wyższego wykształcenia na kierunkach informatycznych lub pokrewnych. (§3.3)</p>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Terminy i zakres</h2>
+    <div class="form-grid">
+        <div class="field">
+            <label>Rok akademicki <span class="req">*</span></label>
+            <input name="rok_akademicki" placeholder="np. 2024/2025"
+                   value="{{ p.rok_akademicki if p else '' }}" required>
+            <p class="hint">Rok akademicki, w którym odbywa się praktyka.</p>
+        </div>
+        <div class="field">
+            <label>Semestr od</label>
+            <select name="semestr_od">
+                {% for s in range(1, 8) %}
+                    <option value="{{ s }}" {% if (p and p.semestr_od == s) or (not p and s == 6) %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>Semestr do</label>
+            <select name="semestr_do">
+                {% for s in range(1, 8) %}
+                    <option value="{{ s }}" {% if (p and p.semestr_do == s) or (not p and s == 7) %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>Data rozpoczęcia</label>
+            <input type="date" name="data_od" value="{{ p.data_od.isoformat() if p and p.data_od else '' }}">
+        </div>
+        <div class="field">
+            <label>Data zakończenia</label>
+            <input type="date" name="data_do" value="{{ p.data_do.isoformat() if p and p.data_do else '' }}">
+            {% if p and p.data_do and p.data_do.month > 2 %}
+                <p class="hint" style="color:#856404;">
+                    Praktyka powinna zakończyć się do połowy lutego. (§3 Org. pkt 2)
+                </p>
+            {% endif %}
+        </div>
+        <div class="field">
+            <label>Planowana liczba godzin</label>
+            <input type="number" min="0" name="liczba_godzin" value="{{ p.liczba_godzin or '' if p else '' }}">
+        </div>
+        <div class="field">
+            <label>Tryb realizacji</label>
+            <select name="tryb_realizacji">
+                <option value="">— wybierz —</option>
+                <option value="ciagla"  {% if p and p.tryb_realizacji=='ciagla'  %}selected{% endif %}>Ciągła</option>
+                <option value="etapowa" {% if p and p.tryb_realizacji=='etapowa' %}selected{% endif %}>Etapowa</option>
+            </select>
+            <p class="hint">Ciągła — nieprzerwany okres; etapowa — realizowana w częściach.</p>
+        </div>
+        <div class="field">
+            <label>Promotor uczelniany</label>
+            <select name="promotor_id">
+                <option value="">— wybierz —</option>
+                {% for pr in promotorzy %}
+                    <option value="{{ pr.id }}" {% if p and p.promotor_id==pr.id %}selected{% endif %}>
+                        {{ pr.pelne_imie }} ({{ pr.email }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field full">
+            <label>Zakres zadań / program praktyki</label>
+            <textarea name="zakres_zadan" rows="5">{{ p.zakres_zadan if p else '' }}</textarea>
+            <p class="hint">Opis merytoryczny zadań uzgodnionych z zakładem pracy.</p>
+        </div>
+        <div class="field full">
+            <label>Harmonogram realizacji</label>
+            <textarea name="harmonogram" rows="4">{{ p.harmonogram if p else '' }}</textarea>
+            <p class="hint">Planowany podział zadań w czasie (np. miesiącami lub tygodniami).</p>
+        </div>
+    </div>
+</div>
+
+{% if p %}
+<div class="panel">
+    <h2>Sprawozdanie z praktyki</h2>
+    <div class="form-grid">
+        <div class="field full">
+            <label>Treść sprawozdania</label>
+            <textarea name="sprawozdanie_tresc" rows="6">{{ p.sprawozdanie_tresc or '' }}</textarea>
+            <p class="hint">Opis przebiegu praktyki, zrealizowanych zadań, zdobytych umiejętności.</p>
+        </div>
+        <div class="field full">
+            <label>Wnioski</label>
+            <textarea name="sprawozdanie_wnioski" rows="4">{{ p.sprawozdanie_wnioski or '' }}</textarea>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Ankieta (ocena miejsca praktyki 1–5)</h2>
+    <div class="form-grid">
+        <div class="field">
+            <label>Atmosfera w miejscu praktyki</label>
+            <select name="ankieta_atmosfera">
+                <option value="">—</option>
+                {% for i in range(1,6) %}<option value="{{ i }}" {% if p.ankieta_atmosfera==i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>Organizacja praktyki</label>
+            <select name="ankieta_organizacja">
+                <option value="">—</option>
+                {% for i in range(1,6) %}<option value="{{ i }}" {% if p.ankieta_organizacja==i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>Poszerzenie wiedzy</label>
+            <select name="ankieta_wiedza">
+                <option value="">—</option>
+                {% for i in range(1,6) %}<option value="{{ i }}" {% if p.ankieta_wiedza==i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="field full">
+            <label>Komentarz</label>
+            <textarea name="ankieta_komentarz" rows="3">{{ p.ankieta_komentarz or '' }}</textarea>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="panel">
+    <h2>Potwierdzenia</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:normal;">
+            <input type="checkbox" name="regulamin_zapoznany" value="1" style="margin-top:3px;flex-shrink:0;"
+                   {% if p and p.regulamin_zapoznany %}checked{% endif %}>
+            <span style="font-size:14px;">
+                Zapoznałem/am się z regulaminem praktyk zawodowych i zobowiązuję się do jego przestrzegania. <em>(§8.3a regulaminu)</em>
+                <strong style="color:#c0392b;"> *</strong>
+            </span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:normal;">
+            <input type="checkbox" name="bhp_zaakceptowane" value="1" style="margin-top:3px;flex-shrink:0;"
+                   {% if p and p.bhp_zaakceptowane %}checked{% endif %}>
+            <span style="font-size:14px;">
+                Zapoznałem/am się z przepisami BHP, regulaminem pracy oraz zasadami ochrony informacji obowiązującymi w miejscu odbywania praktyki i zobowiązuję się do ich przestrzegania. <em>(§4.3 zasad praktyk)</em>
+                <strong style="color:#c0392b;"> *</strong>
+            </span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:normal;">
+            <input type="checkbox" name="ubezpieczenie_nnw" value="1" style="margin-top:3px;flex-shrink:0;"
+                   {% if p and p.ubezpieczenie_nnw %}checked{% endif %}>
+            <span style="font-size:14px;">
+                Posiadam ważne ubezpieczenie NNW na czas odbywania praktyki. <em>(§8.2 regulaminu)</em>
+            </span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:normal;">
+            <input type="checkbox" name="erasmus_plus" value="1" style="margin-top:3px;flex-shrink:0;"
+                   {% if p and p.erasmus_plus %}checked{% endif %}>
+            <span style="font-size:14px;">
+                Praktyka realizowana w ramach programu Erasmus+. <em>(§2.3 / Org. pkt 7)</em>
+            </span>
+        </label>
+    </div>
+    <p class="hint" style="margin-top:8px;"><strong style="color:#c0392b;">*</strong> wymagane do zgłoszenia praktyki</p>
+</div>
+
+<div class="form-actions">
+    {% if not p %}
+        <button class="btn btn-ghost" type="submit">Zapisz jako roboczą</button>
+        <button class="btn btn-primary" type="submit" name="zglos" value="1">Zgłoś do promotora</button>
+    {% else %}
+        <a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">Anuluj</a>
+        <button class="btn btn-primary" type="submit">Zapisz zmiany</button>
+    {% endif %}
+</div>
+</form>
+{% endblock %}

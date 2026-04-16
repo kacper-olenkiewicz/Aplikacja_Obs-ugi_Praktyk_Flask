@@ -1,0 +1,90 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'zmiana_terminu' %}
+{% block title %}Wniosek o zmianę terminu{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wniosek o zmianę terminu praktyki</h1>
+        <p class="muted">
+            <span class="badge badge-{{ wn.status }}">{{ wn.status_label }}</span>
+            · złożono {{ wn.created_at|pl_date }}
+        </p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('zmiana_terminu_list') }}">Wróć do listy</a>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+<div>
+
+<div class="panel">
+    <h2>Szczegóły wniosku</h2>
+    <dl class="kv">
+        <dt>Powód</dt><dd>{{ wn.powod_label }}</dd>
+        <dt>Uzasadnienie</dt>
+        <dd>{{ wn.opis|replace('\n','<br>')|safe }}</dd>
+        {% if wn.proponowany_semestr %}
+        <dt>Proponowany semestr</dt><dd>{{ wn.proponowany_semestr }}</dd>
+        {% endif %}
+        {% if wn.proponowana_data_od %}
+        <dt>Proponowana data od</dt><dd>{{ wn.proponowana_data_od|pl_date }}</dd>
+        {% endif %}
+        {% if wn.proponowana_data_do %}
+        <dt>Proponowana data do</dt><dd>{{ wn.proponowana_data_do|pl_date }}</dd>
+        {% endif %}
+    </dl>
+</div>
+
+{% if wn.komentarz_dyrektora %}
+<div class="panel" style="border-color:var(--ans-red);">
+    <h2>Decyzja dyrektora</h2>
+    <dl class="kv">
+        <dt>Status</dt>
+        <dd><span class="badge badge-{{ wn.status }}">{{ wn.status_label }}</span></dd>
+        {% if wn.data_decyzji %}
+        <dt>Data decyzji</dt><dd>{{ wn.data_decyzji|pl_date }}</dd>
+        {% endif %}
+        <dt>Komentarz</dt>
+        <dd>{{ wn.komentarz_dyrektora|replace('\n','<br>')|safe }}</dd>
+    </dl>
+</div>
+{% endif %}
+
+</div>
+<div>
+
+<div class="panel">
+    <h2>Status wniosku</h2>
+    <div style="font-size:24px;font-weight:600;color:var(--ans-red);margin-bottom:8px;">
+        {{ wn.status_label }}
+    </div>
+    {% if wn.status == 'zlozony' %}
+        <p class="muted" style="font-size:13px;margin:0;">
+            Wniosek oczekuje na decyzję Dyrektora Instytutu.
+        </p>
+    {% elif wn.status == 'zatwierdzony' %}
+        <p style="font-size:13px;color:#2e7d32;margin:0;">
+            Dyrektor wyraził zgodę na realizację praktyki w zmienionym terminie.
+        </p>
+    {% elif wn.status == 'odrzucony' %}
+        <p style="font-size:13px;color:#c62828;margin:0;">
+            Wniosek został odrzucony.
+        </p>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <h2>Podstawa prawna</h2>
+    <p class="muted" style="font-size:13px;margin:0;">
+        {% if wn.powod == 'erasmus' %}
+            §3 Org. pkt 7 — wyjazd zagraniczny w ramach programów unijnych. Zgoda Dyrektora wymagana po
+            zasięgnięciu opinii Opiekuna praktyk.
+        {% else %}
+            §3 Org. pkt 3 — szczególnie uzasadniony przypadek. Decyzję podejmuje Dyrektor Instytutu
+            Informatyki Stosowanej. Zmiana terminu nie zwalnia z uczestnictwa w zajęciach.
+        {% endif %}
+    </p>
+</div>
+
+</div>
+</div>
+{% endblock %}

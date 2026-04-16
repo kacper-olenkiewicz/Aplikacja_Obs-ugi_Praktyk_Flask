@@ -1,0 +1,46 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'zmiana_terminu' %}
+{% block title %}Zmiana terminu praktyki{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wnioski o zmianę terminu</h1>
+        <p class="muted">Realizacja praktyki w innym terminie niż wskazany w programie studiów (§3 Org. pkt 3 i 7)</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('zmiana_terminu_nowy') }}">+ Nowy wniosek</a>
+</div>
+
+{% if wnioski %}
+<div class="panel">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Data złożenia</th>
+                <th>Powód</th>
+                <th>Proponowany semestr</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for wn in wnioski %}
+            <tr>
+                <td style="white-space:nowrap;">{{ wn.created_at|pl_date }}</td>
+                <td>{{ wn.powod_label }}</td>
+                <td>{{ wn.proponowany_semestr or '—' }}</td>
+                <td><span class="badge badge-{{ wn.status }}">{{ wn.status_label }}</span></td>
+                <td>
+                    <a class="btn btn-ghost btn-sm"
+                       href="{{ url_for('zmiana_terminu_detail', wn_id=wn.id) }}">Szczegóły</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="panel">
+    <p class="muted" style="margin:0;">Nie złożono jeszcze żadnego wniosku o zmianę terminu.</p>
+</div>
+{% endif %}
+{% endblock %}

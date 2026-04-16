@@ -1,0 +1,86 @@
+{% extends "admin/_layout.html" %}
+{% set nav = 'zmiana_terminu' %}
+{% block title %}Wnioski o zmianę terminu{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wnioski o zmianę terminu praktyki</h1>
+        <p class="muted">Decyzje Dyrektora Instytutu (§3 Org. pkt 3 i 7)</p>
+    </div>
+</div>
+
+{% if wnioski %}
+<div class="panel">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Data złożenia</th>
+                <th>Student</th>
+                <th>Powód</th>
+                <th>Proponowany semestr</th>
+                <th>Proponowane daty</th>
+                <th>Status</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for wn in wnioski %}
+            <tr>
+                <td style="white-space:nowrap;">{{ wn.created_at|pl_date }}</td>
+                <td>
+                    <strong>{{ wn.student.pelne_imie }}</strong>
+                    {% if wn.student.nr_albumu %}
+                        <br><small style="color:var(--muted);">nr alb. {{ wn.student.nr_albumu }}</small>
+                    {% endif %}
+                </td>
+                <td>{{ wn.powod_label }}</td>
+                <td>{{ wn.proponowany_semestr or '—' }}</td>
+                <td style="font-size:13px;white-space:nowrap;">
+                    {% if wn.proponowana_data_od %}
+                        {{ wn.proponowana_data_od|pl_date }}
+                        {% if wn.proponowana_data_do %} – {{ wn.proponowana_data_do|pl_date }}{% endif %}
+                    {% else %}—{% endif %}
+                </td>
+                <td><span class="badge badge-{{ wn.status }}">{{ wn.status_label }}</span></td>
+                <td>
+                    {% if wn.status == 'zlozony' %}
+                    <details style="display:inline-block;">
+                        <summary class="btn btn-ghost btn-sm" style="list-style:none;cursor:pointer;">Rozpatrz</summary>
+                        <div style="position:absolute;z-index:100;background:var(--bg);border:1px solid var(--border);
+                                    border-radius:8px;padding:16px;min-width:320px;box-shadow:0 4px 12px rgba(0,0,0,.12);">
+                            <p style="font-size:13px;margin:0 0 8px;"><strong>Uzasadnienie studenta:</strong></p>
+                            <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+                                {{ wn.opis|replace('\n','<br>')|safe }}
+                            </p>
+                            <form method="post"
+                                  action="{{ url_for('admin_zmiana_terminu_decyzja', wn_id=wn.id) }}">
+                                <div class="field" style="margin-bottom:10px;">
+                                    <label style="font-size:12px;">Komentarz (opcjonalnie)</label>
+                                    <textarea name="komentarz" rows="2"></textarea>
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    <button class="btn btn-primary btn-sm" type="submit"
+                                            name="akcja" value="zatwierdz">Zatwierdź</button>
+                                    <button class="btn btn-danger btn-sm" type="submit"
+                                            name="akcja" value="odrzuc">Odrzuć</button>
+                                </div>
+                            </form>
+                        </div>
+                    </details>
+                    {% else %}
+                        {% if wn.data_decyzji %}
+                            <span style="font-size:12px;color:var(--muted);">{{ wn.data_decyzji|pl_date }}</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="panel">
+    <p class="muted" style="margin:0;">Brak wniosków o zmianę terminu.</p>
+</div>
+{% endif %}
+{% endblock %}

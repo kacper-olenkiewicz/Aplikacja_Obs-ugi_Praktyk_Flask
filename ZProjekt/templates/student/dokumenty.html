@@ -1,0 +1,68 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'praktyki' %}
+{% block title %}Dokumenty · {{ p.firma_nazwa }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Dokumenty praktyki</h1>
+        <p class="muted">{{ p.firma_nazwa }} · wgrane skany, podpisane umowy, załączniki.</p>
+    </div>
+    <div><a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">← Powrót</a></div>
+</div>
+
+<div class="panel">
+    <h2>Wgraj nowy dokument</h2>
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-grid">
+            <div class="field">
+                <label>Typ dokumentu</label>
+                <select name="typ">
+                    {% for k, v in typy.items() %}
+                        <option value="{{ k }}">{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field full">
+                <label>Plik</label>
+                <input type="file" name="plik" accept=".pdf,.doc,.docx,.odt,.jpg,.jpeg,.png" required>
+                <p class="hint">Dozwolone: PDF, DOC/DOCX, ODT, JPG, PNG. Max 16 MB.</p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Wgraj dokument</button>
+        </div>
+    </form>
+</div>
+
+<div class="panel">
+    <h2>Moje pliki ({{ dokumenty|length }})</h2>
+    {% if dokumenty %}
+        <table class="table">
+            <thead>
+                <tr><th>Typ</th><th>Plik</th><th>Rozmiar</th><th>Dodano</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for d in dokumenty %}
+                <tr>
+                    <td><span class="badge badge-zgloszona">{{ d.typ_label }}</span></td>
+                    <td>{{ d.nazwa_oryginalna }}</td>
+                    <td>{{ '%.1f'|format((d.rozmiar or 0)/1024) }} KB</td>
+                    <td>{{ d.created_at|pl_date }}</td>
+                    <td class="row-actions">
+                        <a class="btn btn-ghost btn-sm" href="{{ url_for('dokument_pobierz', praktyka_id=p.id, dok_id=d.id) }}">Pobierz</a>
+                        <form method="post" class="inline" action="{{ url_for('dokument_usun', praktyka_id=p.id, dok_id=d.id) }}" onsubmit="return confirm('Usunąć dokument?');">
+                            <button class="btn btn-danger btn-sm" type="submit">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">
+            <h3>Brak dokumentów</h3>
+            <p>Wgraj skan umowy, karty praktyki czy innego załącznika.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

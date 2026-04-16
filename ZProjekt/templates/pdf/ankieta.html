@@ -1,0 +1,33 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}ANKIETA — OCENA MIEJSCA PRAKTYKI{% endblock %}
+{% block doc_subtitle %}Załącznik nr 5 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<table class="kv">
+    <tr><td class="k">Student</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
+    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}</td></tr>
+    <tr><td class="k">Termin</td><td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }}</td></tr>
+</table>
+
+<h2>Ocena miejsca praktyki (skala 1–5)</h2>
+<table class="tbl">
+    <thead>
+        <tr><th>Obszar</th><th style="width:18%;text-align:center;">Ocena</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Atmosfera w miejscu praktyki</td><td style="text-align:center;">{{ p.ankieta_atmosfera or '—' }}</td></tr>
+        <tr><td>Organizacja praktyki</td><td style="text-align:center;">{{ p.ankieta_organizacja or '—' }}</td></tr>
+        <tr><td>Poszerzenie wiedzy i umiejętności</td><td style="text-align:center;">{{ p.ankieta_wiedza or '—' }}</td></tr>
+    </tbody>
+</table>
+
+<h2>Komentarz</h2>
+<div class="block">{{ (p.ankieta_komentarz or '')|replace('\n','<br>')|safe }}</div>
+
+<table class="sign">
+    <tr>
+        <td colspan="2">{{ today|pl_date }}<br><span class="small">podpis studenta</span></td>
+    </tr>
+</table>
+{% endblock %}

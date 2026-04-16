@@ -1,0 +1,47 @@
+{% extends "student/_layout.html" %}
+{% set nav = 'praktyki' %}
+{% block title %}Wniosek o przedłużenie — {{ p.firma_nazwa }}{% endblock %}
+{% block main %}
+<div class="page-header">
+    <div>
+        <h1>Wniosek o przedłużenie praktyki</h1>
+        <p class="muted">{{ p.firma_nazwa }} · §6.2 Regulaminu</p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">Anuluj</a>
+</div>
+
+<div class="panel" style="max-width:600px;">
+    <p style="font-size:13px;color:var(--muted);margin:0 0 16px;">
+        Wniosek o przedłużenie składasz gdy nie możesz zrealizować praktyki z przyczyn niezależnych od siebie
+        (np. choroba powyżej 40 h). Przedłużenie jest możliwe maksymalnie o 1 miesiąc od planowanego zakończenia.
+    </p>
+    <form method="post">
+        <div class="field">
+            <label>Powód <span class="req">*</span></label>
+            <select name="powod" required>
+                <option value="">— wybierz —</option>
+                <option value="choroba">Choroba</option>
+                <option value="inne">Inne przyczyny niezależne od studenta</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Liczba godzin nieobecności (przy chorobie)</label>
+            <input type="number" min="1" name="godziny_nieobecnosci" placeholder="np. 56">
+            <p class="hint">Wymagane powyżej 40 godzin dla uzyskania przedłużenia z tytułu choroby.</p>
+        </div>
+        <div class="field">
+            <label>Opis sytuacji</label>
+            <textarea name="opis" rows="4"></textarea>
+        </div>
+        <div class="field">
+            <label>Proponowana nowa data zakończenia</label>
+            <input type="date" name="proponowana_data_do"
+                   value="{{ p.data_do.isoformat() if p.data_do else '' }}">
+        </div>
+        <div class="form-actions">
+            <a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">Anuluj</a>
+            <button class="btn btn-primary" type="submit">Złóż wniosek</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
