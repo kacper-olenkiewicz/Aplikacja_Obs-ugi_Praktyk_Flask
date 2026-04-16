@@ -12,3 +12,7 @@ ZProjekt/.env
 *.db
 
 ZProjekt/migrations/versions/*.pyc
+
+PlikiPraktyka/
+
+testy/
