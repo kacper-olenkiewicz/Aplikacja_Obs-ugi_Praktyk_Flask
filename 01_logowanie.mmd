@@ -1,0 +1,36 @@
+sequenceDiagram
+    participant S as Student
+    participant F as Backend (Flask)
+    participant MS as Microsoft Azure AD
+    participant DB as PostgreSQL
+
+    S->>F: GET /auth/login
+    F->>F: Generuj state (uuid)
+    F-->>S: Redirect na URL logowania MS
+
+    S->>MS: Logowanie (email + haslo uczelni)
+    MS-->>S: Redirect /auth/callback?code=...&state=...
+
+    S->>F: GET /auth/callback?code=...
+    F->>F: Weryfikacja state
+
+    alt state nieprawidlowy
+        F-->>S: Blad - sprobuj ponownie
+    else state poprawny
+        F->>MS: acquire_token_by_authorization_code
+        MS-->>F: access_token + id_token (claims)
+
+        F->>MS: GET /v1.0/me (Graph API)
+        MS-->>F: displayName, email, oid
+
+        F->>DB: Szukaj usera po ms_oid
+        alt user nie istnieje
+            F->>DB: Utworz nowego usera (rola: student)
+        else user istnieje
+            F->>DB: Aktualizuj email, imie, last_login_at
+        end
+
+        DB-->>F: User object
+        F->>F: Zapisz sesje (id, email, rola)
+        F-->>S: Redirect /dashboard
+    end

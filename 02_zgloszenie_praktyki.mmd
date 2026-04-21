@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant S as Student
+    participant F as Backend (Flask)
+    participant DB as PostgreSQL
+    participant P as Promotor
+
+    S->>F: GET /praktyki/nowa
+    F->>DB: Pobierz liste promotorow
+    DB-->>F: Lista promotorow
+    F-->>S: Formularz zgłoszenia
+
+    S->>F: POST /praktyki/nowa (dane firmy, promotor, daty)
+    F->>F: Walidacja danych
+
+    alt brak nazwy firmy lub brak akceptacji BHP/regulaminu
+        F-->>S: Blad walidacji - popraw formularz
+    else dane poprawne
+        F->>DB: Utworz Praktyka (status: zgloszona)
+        DB-->>F: Praktyka ID
+        F-->>S: Redirect /praktyki/<id>
+    end
+
+    Note over P,DB: Promotor przeglada przypisane praktyki
+
+    P->>F: GET /promotor/praktyki/<id>
+    F->>DB: Pobierz praktyke + wpisy + dokumenty
+    DB-->>F: Dane praktyki
+    F-->>P: Widok szczegolowy praktyki
+
+    P->>F: POST /promotor/praktyki/<id>/akcja (akcja: akceptuj)
+    F->>DB: Zmien status na 'zaakceptowana'\nustaw porozumienie_podpisane
+    DB-->>F: OK
+    F-->>P: Komunikat - praktyka zaakceptowana
+
+    F-->>S: Student widzi status 'zaakceptowana' przy kolejnym wejsciu

@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant S as Student
+    participant F as Backend (Flask)
+    participant R as Redis (broker)
+    participant C as Celery Worker
+    participant DB as PostgreSQL
+
+    S->>F: GET /praktyki/<id>/pdf/dziennik
+    F->>F: Sprawdz uprawnienia do praktyki
+    F->>R: generate_pdf.delay(praktyka_id, kind, user_id)
+    R-->>F: task_id
+    F-->>S: JSON {task_id: "abc123"}
+
+    loop Polling co 1.5s (JS w przegladarce)
+        S->>F: GET /pdf/status/abc123
+        F->>R: AsyncResult(task_id).state
+        R-->>F: PENDING / SUCCESS / FAILURE
+        F-->>S: JSON {state, ready, failed}
+    end
+
+    Note over C,DB: Celery przetwarza zadanie w tle
+
+    R->>C: Pobierz zadanie z kolejki
+    C->>DB: Pobierz Praktyka + DziennikWpisy + Student
+    DB-->>C: Dane praktyki
+    C->>C: render_template(pdf/dziennik.html)
+    C->>C: pisa.CreatePDF (xhtml2pdf)
+
+    alt blad generowania
+        C->>R: Ponow probe (max 2 razy, delay 3s)
+    else PDF wygenerowany
+        C->>R: setex pdf_result:abc123 (TTL 1h)
+        C->>R: setex pdf_filename:abc123
+    end
+
+    S->>F: GET /pdf/download/abc123
+    F->>R: Pobierz pdf_result:abc123
+    R-->>F: Bajty PDF
+
+    alt wynik nie istnieje (wygasl lub blad)
+        F-->>S: HTTP 404
+    else wynik dostepny
+        F-->>S: send_file(dziennik_praktyki_<id>.pdf)
+    end

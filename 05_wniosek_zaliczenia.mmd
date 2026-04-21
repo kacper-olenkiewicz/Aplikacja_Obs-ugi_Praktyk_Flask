@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant S as Student
+    participant F as Backend (Flask)
+    participant DB as PostgreSQL
+    participant P as Promotor (komisja)
+    participant R as Root (Dyrektor)
+
+    S->>F: POST /wnioski/nowy (typ, pracodawca, daty, uzasadnienie)
+    F->>F: Walidacja - typ i pracodawca wymagane
+    F->>DB: Utworz WniosekZaliczenia (status: zlozony)
+    DB-->>F: Wniosek ID
+    F-->>S: Redirect /wnioski/<id>
+
+    S->>F: POST /wnioski/<id>/dokument (zaswiadczenie PDF)
+    F->>F: Zapis pliku na dysk
+    F->>DB: Utworz WniosekDokument
+    F-->>S: Dokument dolaczony
+
+    P->>F: GET /promotor/wnioski/
+    F->>DB: Pobierz wnioski studentow promotora
+    DB-->>F: Lista wnioskow
+    F-->>P: Panel wnioskow
+
+    P->>F: POST /promotor/wnioski/<id> (akcja: ocen_pozytywnie)
+    F->>DB: Ustaw ocena_komisji='pozytywna'\nZmien status na 'u_dyrektora'
+    DB-->>F: OK
+    F-->>P: Wniosek przekazany do dyrektora
+
+    R->>F: POST /admin/wnioski/<id>/decyzja (akcja: zatwierdz)
+
+    alt wniosek nie jest w statusie 'u_dyrektora'
+        F-->>R: Blad - decyzja niemozliwa
+    else status poprawny
+        F->>DB: Ustaw decyzja_dyrektora='zatwierdzona'\nZmien status na 'zatwierdzony'
+        DB-->>F: OK
+        F-->>R: Wniosek zatwierdzony
+    end

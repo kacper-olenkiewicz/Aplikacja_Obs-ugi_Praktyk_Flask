@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant S as Student
+    participant F as Backend (Flask)
+    participant DB as PostgreSQL
+    participant P as Promotor
+
+    S->>F: POST /praktyki/<id>/zloz (rozpocznij realizacje)
+    F->>DB: Sprawdz czy porozumienie_podpisane
+
+    alt porozumienie niepodpisane
+        F-->>S: Blad - promotor musi najpierw potwierdzic porozumienie
+    else porozumienie podpisane
+        F->>DB: Zmien status na 'w_trakcie'
+        F-->>S: Realizacja rozpoczeta
+    end
+
+    loop Kazdy dzien praktyki
+        S->>F: POST /praktyki/<id>/dziennik (data, godz_od, godz_do, opis)
+        F->>F: Walidacja daty i opisu
+        F->>DB: Utworz DziennikWpis
+        DB-->>F: OK
+        F-->>S: Wpis dodany
+    end
+
+    S->>F: POST /praktyki/<id>/dokumenty (plik PDF/DOC)
+    F->>F: Walidacja rozszerzenia pliku
+    F->>F: Zapisz plik na dysk (uuid.ext)
+    F->>DB: Utworz Dokument (metadane)
+    F-->>S: Dokument dodany
+
+    S->>F: POST /praktyki/<id>/zloz (zloz do oceny)
+    F->>DB: Zmien status na 'do_oceny'
+    F-->>S: Dokumentacja zlożona
+
+    P->>F: POST /promotor/praktyki/<id>/akcja (akcja: zalicz, ocena: 5)
+    F->>DB: Zmien status na 'zaliczona'\nZapisz ocene
+    DB-->>F: OK
+    F-->>P: Praktyka zaliczona z ocena 5
