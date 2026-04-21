@@ -7,3 +7,6 @@ Flask-SQLAlchemy>=3.1.0
 Flask-Migrate>=4.0.0
 psycopg2-binary>=2.9.9
 xhtml2pdf>=0.2.15
+celery>=5.3.0
+redis>=5.0.0
+gunicorn>=21.2.0

@@ -1,0 +1,80 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}POTWIERDZENIE UZYSKANIA EFEKTÓW UCZENIA SIĘ W RAMACH PRAKTYKI ZAWODOWEJ{% endblock %}
+{% block doc_subtitle %}Załącznik nr 4 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<table class="kv" style="margin-bottom:10px;">
+    <tr><td class="k">Student / ka</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">Nr albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">Kierunek studiów</td><td>{{ student.kierunek or 'Informatyka' }}</td></tr>
+    <tr><td class="k">Specjalność</td><td>{{ student.specjalnosc or '' }}</td></tr>
+</table>
+
+<p style="font-size:11px;margin:0 0 10px;line-height:1.7;">
+    W ramach praktyki zawodowej zrealizowanego w wymiarze
+    <strong>{{ p.liczba_godzin or suma_godzin|int or '………' }}</strong> godzin
+    &nbsp; uzyskał/a &nbsp;/&nbsp; nie uzyskał/a&nbsp;
+    <span style="font-size:10px;color:#666;">*)</span>
+    zakładane dla praktyki zawodowej efekty uczenia się:
+</p>
+
+<table class="tbl">
+    <thead>
+        <tr>
+            <th style="width:5%;text-align:center;">Nr</th>
+            <th style="width:57%;">Efekty uczenia się</th>
+            <th style="text-align:center;">Potwierdzenie uzyskania efektów</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set efekty = [
+            (1, 'Ma wiedzę na temat sposobu realizacji zadań inżynierskich dotyczących informatyki z zachowaniem standardów i norm technicznych.'),
+            (2, 'Zna technologie, narzędzia, metody, techniki oraz sprzęt stosowane w informatyce.'),
+            (3, 'Zna ekonomiczne, prawne skutki własnych działań podejmowanych w ramach praktyki oraz ograniczenia wynikające z prawa autorskiego i kodeksu pracy.'),
+            (4, 'Zna zasady bezpieczeństwa pracy i ergonomii w zawodzie informatyka.'),
+            (5, 'Pozyskuje informacje odnośnie technologii, metod, technik, sprzętu wymaganego do realizacji powierzonego zadania, posługując się rozmaitymi źródłami literaturowymi i zasobami publikowanymi w języku polskim jak i angielskim.'),
+            (6, 'W oparciu o kontakty ze środowiskiem inżynierskim zakładu, potrafi podnieść swoje kompetencje, wiedzę i umiejętności, co najmniej z dwóch zakresów: zadania dotyczące sprzętu i oprogramowania: np.: programowania, administrowanie siecią komputerową, konserwacja sprzętu i oprogramowania, bieżące usuwanie usterek, administrowanie zasobami informatycznymi zakładu pracy / instytucji, (e) usługami.'),
+            (7, 'Opracowuje dokumentację dotyczącą realizacji podejmowanych zadań w ramach praktyki, a także referuje ustnie prezentowane w niej zagadnienia.'),
+            (8, 'Potrafi zidentyfikować problem informatyczny występujący w zakładzie pracy / instytucji, opisać go, przedstawić koncepcję rozwiązania i ją zrealizować.'),
+            (9, 'Potrafi rozwiązać rzeczywiste zadanie inżynierskie z zakresu działalności informatycznej zakładu pracy / instytucji stosując normy i standardy stosowane w informatyce oraz biorąc pod uwagę aspekty środowiskowe i etyczne.'),
+            (10, 'Pracuje w zespole zajmującym się zawodowo branżą IT.'),
+            (11, 'Przestrzega zasad etyki zawodowej i zgodnie z tymi zasadami korzysta z wiedzy i pomocy doświadczonych kolegów.'),
+            (12, 'Kontaktując się z osobami spoza branży potrafi zarówno pozyskać od nich niezbędne informacje do realizacji planowanego zadania, jak i przekazać im w sposób zrozumiały informacje i opinie z zakresu informatyki.'),
+            (13, 'Dostrzega w praktyce tempo deaktualizacji wiedzy informatycznej oraz skutki działalności informatyków w szczególności ekonomiczne i społeczne.')
+        ] %}
+        {% for nr, tresc in efekty %}
+        <tr>
+            <td style="text-align:center;font-weight:bold;">{{ '%02d'|format(nr) }}</td>
+            <td style="font-size:10.5px;">{{ tresc }}</td>
+            <td style="text-align:center;font-size:10.5px;white-space:nowrap;">
+                uzyskał/a &nbsp;<span style="font-size:9px;color:#666;">*)</span><br>
+                nie uzyskał/a &nbsp;<span style="font-size:9px;color:#666;">*)</span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p style="font-size:10px;color:#555;margin:6px 0 16px;">*) niewłaściwe skreślić</p>
+
+<p style="font-size:11px;font-weight:bold;margin:0 0 4px;">Potwierdzenie bezpośredniego opiekuna zakładowego:</p>
+<table class="sign" style="margin-top:8px;">
+    <tr>
+        <td style="width:55%;">&nbsp;</td>
+        <td>&nbsp;<br><span class="small">Data, podpis i pieczęć zakładu pracy</span></td>
+    </tr>
+</table>
+
+<p style="font-size:11px;font-weight:bold;margin:16px 0 4px;">Opinia opiekuna uczelnianego</p>
+<div style="font-size:11px;min-height:56px;border-bottom:1px solid #ccc;margin-bottom:4px;padding-bottom:4px;line-height:1.8;">
+    {{ (p.komentarz_promotora or '')|replace('\n','<br>')|safe }}
+</div>
+<div style="height:16px;border-bottom:1px solid #ccc;margin-bottom:4px;"></div>
+<div style="height:16px;border-bottom:1px solid #ccc;margin-bottom:14px;"></div>
+
+<p style="font-size:11px;margin:10px 0 0;letter-spacing:0.5px;">
+    ……………………………………………………………………………………
+    &nbsp; Data, podpis opiekuna uczelnianego
+</p>
+
+{% endblock %}

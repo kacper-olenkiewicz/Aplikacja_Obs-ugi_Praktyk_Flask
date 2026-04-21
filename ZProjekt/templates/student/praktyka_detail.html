@@ -93,15 +93,20 @@
 </div>
 {% endif %}
 
-{% if p.sprawozdanie_tresc or p.sprawozdanie_wnioski %}
+{% if p.sprawozdanie_charakterystyka or p.sprawozdanie_opis_prac or p.sprawozdanie_samoocena %}
 <div class="panel">
-    <h2>Sprawozdanie</h2>
-    {% if p.sprawozdanie_tresc %}
-        <p>{{ p.sprawozdanie_tresc|replace('\n','<br>')|safe }}</p>
+    <h2>Sprawozdanie z praktyki</h2>
+    {% if p.sprawozdanie_charakterystyka %}
+        <h3 style="font-size:14px;margin-top:0;">I. Charakterystyka miejsca odbywania praktyki</h3>
+        <p>{{ p.sprawozdanie_charakterystyka|replace('\n','<br>')|safe }}</p>
     {% endif %}
-    {% if p.sprawozdanie_wnioski %}
-        <h3 style="font-size:14px;margin-top:12px;">Wnioski</h3>
-        <p>{{ p.sprawozdanie_wnioski|replace('\n','<br>')|safe }}</p>
+    {% if p.sprawozdanie_opis_prac %}
+        <h3 style="font-size:14px;margin-top:12px;">II. Opis i analiza wykonywanych prac</h3>
+        <p>{{ p.sprawozdanie_opis_prac|replace('\n','<br>')|safe }}</p>
+    {% endif %}
+    {% if p.sprawozdanie_samoocena %}
+        <h3 style="font-size:14px;margin-top:12px;">III. Wiedza i umiejętności uzyskane w trakcie praktyki</h3>
+        <p>{{ p.sprawozdanie_samoocena|replace('\n','<br>')|safe }}</p>
     {% endif %}
 </div>
 {% endif %}
@@ -204,11 +209,12 @@
     <h2>Pobierz jako PDF</h2>
     <p class="muted" style="font-size:13px;margin:0 0 10px;">Wygeneruj wypełnione dokumenty do wydruku lub złożenia.</p>
     <div style="display:flex;flex-direction:column;gap:6px;">
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta') }}">Karta praktyki</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Dziennik praktyki</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='sprawozdanie') }}">Sprawozdanie</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='ankieta') }}">Ankieta</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='program') }}">Program i harmonogram (Zał. 2a)</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta') }}">Karta praktyki</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Dziennik praktyki</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='sprawozdanie') }}">Sprawozdanie</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='ankieta') }}">Ankieta</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='program') }}">Program i harmonogram (Zał. 2a)</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='efekty') }}">Potwierdzenie efektów uczenia się (Zał. 4)</a>
     </div>
 </div>
 

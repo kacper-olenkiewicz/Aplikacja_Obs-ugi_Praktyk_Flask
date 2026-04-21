@@ -1,49 +1,130 @@
 {% extends "pdf/_base.html" %}
 {% block doc_title %}KARTA PRAKTYKI ZAWODOWEJ{% endblock %}
-{% block doc_subtitle %}Załącznik nr 3 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block doc_subtitle %}Skierowanie na praktykę &nbsp;·&nbsp; Załącznik nr 3 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
 {% block body %}
 
-<h2>1. Dane studenta</h2>
-<table class="kv">
-    <tr><td class="k">Imię i nazwisko</td><td>{{ student.pelne_imie }}</td></tr>
-    <tr><td class="k">Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
-    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
-    <tr><td class="k">Rok / semestr</td><td>{{ student.rok_studiow or '' }} / {{ student.semestr or '' }}</td></tr>
-    <tr><td class="k">Adres</td><td>{{ student.adres or '' }}</td></tr>
-    <tr><td class="k">Telefon</td><td>{{ student.telefon or '' }}</td></tr>
-    <tr><td class="k">E-mail</td><td>{{ student.email }}</td></tr>
+<p style="font-size:11px;margin:0 0 10px;line-height:1.6;">
+    <strong>Akademia Nauk Stosowanych w Elblągu</strong><br>
+    Instytut Informatyki Stosowanej im. Krzysztofa Brzeskiego
+</p>
+
+{# ── SKIEROWANIE ─────────────────────────────────────────────────────────── #}
+<h2 style="font-size:13px;text-transform:uppercase;margin:0 0 8px;">Skierowanie na praktykę</h2>
+<p style="font-size:11px;margin:0 0 10px;line-height:1.8;">
+    Na podstawie porozumienia nr &nbsp;………………,&nbsp; z dnia &nbsp;………………………………&nbsp; r.,
+    kieruję niżej wymienionego studenta na praktykę zawodową do zakładu pracy:<br>
+    <strong>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</strong><br>
+    <span style="font-size:10px;color:#666;">(nazwa instytucji / zakładu pracy)</span>
+</p>
+
+<table class="kv" style="margin-bottom:10px;">
+    <tr><td class="k">1. Imię i nazwisko</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">2. Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">3. Studia</td>
+        <td>inżynierskie &nbsp; stacjonarne&nbsp;/&nbsp;niestacjonarne&nbsp;
+            <span style="font-size:10px;color:#666;">*) niewłaściwe skreślić</span>
+        </td></tr>
+    <tr><td class="k">4. Kierunek</td>
+        <td>
+            {{ student.kierunek or 'Informatyka' }}<br>
+            <span style="font-size:11px;">specjalność: {{ student.specjalnosc or '' }}</span>
+        </td></tr>
+    <tr><td class="k">5. Czas trwania praktyki</td><td>6 miesięcy &nbsp;(120 dni roboczych)</td></tr>
+    <tr><td class="k">6. Uczelniany opiekun (UOPZ)</td>
+        <td>{{ promotor.pelne_imie if promotor else '' }}</td></tr>
+    <tr><td class="k">7. Termin praktyki</td>
+        <td>od &nbsp;{{ p.data_od|pl_date }}&nbsp; do &nbsp;{{ p.efektywna_data_do|pl_date }}</td></tr>
 </table>
 
-<h2>2. Miejsce odbywania praktyki</h2>
-<table class="kv">
-    <tr><td class="k">Nazwa firmy / instytucji</td><td>{{ p.firma_nazwa }}</td></tr>
-    <tr><td class="k">Adres</td><td>{{ p.firma_adres or '' }}</td></tr>
-    <tr><td class="k">NIP</td><td>{{ p.firma_nip or '' }}</td></tr>
-    <tr><td class="k">Opiekun zakładowy</td><td>{{ p.opiekun_zakladowy_imie_nazwisko or '' }}</td></tr>
-    <tr><td class="k">Stanowisko opiekuna</td><td>{{ p.opiekun_zakladowy_stanowisko or '' }}</td></tr>
-    <tr><td class="k">Kontakt do opiekuna</td><td>{{ p.opiekun_zakladowy_kontakt or '' }}</td></tr>
+<table class="sign" style="margin-top:16px;">
+    <tr>
+        <td style="width:55%;">&nbsp;</td>
+        <td>&nbsp;<br><span class="small">Dyrektor Instytutu lub osoba upoważniona &nbsp;(podpis)</span></td>
+    </tr>
 </table>
 
-<h2>3. Termin praktyki</h2>
-<table class="kv">
-    <tr><td class="k">Data rozpoczęcia</td><td>{{ p.data_od|pl_date }}</td></tr>
-    <tr><td class="k">Data zakończenia</td><td>{{ p.data_do|pl_date }}</td></tr>
-    <tr><td class="k">Liczba godzin</td><td>{{ p.liczba_godzin or '' }}</td></tr>
-</table>
+<hr style="border:none;border-top:1px dashed #ccc;margin:18px 0;">
 
-<h2>4. Zakres zadań / program praktyki</h2>
-<div class="block">{{ (p.zakres_zadan or '')|replace('\n','<br>')|safe }}</div>
-
-<h2>5. Promotor uczelniany</h2>
-<table class="kv">
-    <tr><td class="k">Imię i nazwisko</td><td>{{ promotor.pelne_imie if promotor else '' }}</td></tr>
-    <tr><td class="k">E-mail</td><td>{{ promotor.email if promotor else '' }}</td></tr>
-</table>
+{# ── ZOPZ ─────────────────────────────────────────────────────────────────── #}
+<p style="font-size:11px;margin:0 0 4px;"><strong>Zakładowy opiekun praktyki zawodowej:</strong></p>
+<p style="font-size:11px;margin:0 0 2px;">
+    {{ p.opiekun_zakladowy_imie_nazwisko or '&nbsp;' }}
+    {% if p.opiekun_zakladowy_stanowisko %}&nbsp;·&nbsp;{{ p.opiekun_zakladowy_stanowisko }}{% endif %}
+</p>
+<p style="font-size:10px;color:#666;margin:0 0 14px;">(imię i nazwisko, funkcja, zajmowane stanowisko)</p>
 
 <table class="sign">
     <tr>
-        <td>{{ today|pl_date }}<br><span class="small">data i podpis studenta</span></td>
-        <td>&nbsp;<br><span class="small">podpis promotora uczelnianego</span></td>
+        <td>&nbsp;<br><span class="small">Potwierdzam zgłoszenie się studenta na praktykę<br>(data, pieczęć i podpis zakładowego opiekuna praktyki)</span></td>
+        <td>&nbsp;<br><span class="small">Potwierdzam odbycie szkolenia BHP<br>(data, pieczęć i podpis upoważnionego pracownika zakładu)</span></td>
     </tr>
 </table>
+
+<hr style="border:none;border-top:1px dashed #ccc;margin:18px 0;">
+
+{# ── ZAŚWIADCZENIE ────────────────────────────────────────────────────────── #}
+<h2 style="font-size:12px;text-transform:uppercase;margin:0 0 8px;">Zaświadczenie odbycia praktyki zawodowej</h2>
+<p style="font-size:11px;line-height:1.9;margin:0 0 8px;">
+    Zaświadczam, że student &nbsp;<strong>{{ student.pelne_imie }}</strong>&nbsp; odbył praktykę zawodową<br>
+    w &nbsp;<strong>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</strong><br>
+    w okresie od &nbsp;{{ p.data_od|pl_date }}&nbsp; do &nbsp;{{ p.efektywna_data_do|pl_date }}&nbsp; zgodnie z przyjętym programem.<br>
+    Uwagi: &nbsp;………………………………………………………………………………………………………………………………………………
+</p>
+
+<table class="sign">
+    <tr>
+        <td>{{ today|pl_date }}<br><span class="small">(miejscowość i data)</span></td>
+        <td>&nbsp;<br><span class="small">(pieczęć i podpis kierownika zakładu)</span></td>
+    </tr>
+</table>
+
+<hr style="border:none;border-top:1px dashed #ccc;margin:18px 0;">
+
+{# ── OCENA PRZEBIEGU PRAKTYKI ─────────────────────────────────────────────── #}
+<h2 style="font-size:12px;text-transform:uppercase;margin:0 0 8px;">Ocena przebiegu praktyki zawodowej</h2>
+
+<p style="font-size:11px;margin:0 0 4px;">
+    Ocena parametryczna (w skali 2 do 5): &nbsp;
+    <strong>{{ p.ocena_zopz_parametryczna or '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' }}</strong>
+</p>
+<p style="font-size:11px;margin:0 0 2px;">Ocena opisowa:</p>
+<div style="font-size:11px;min-height:48px;border-bottom:1px solid #ccc;margin-bottom:14px;padding-bottom:4px;line-height:1.7;">
+    {{ (p.ocena_zopz_opisowa or '')|replace('\n','<br>')|safe }}
+</div>
+
+<table class="sign">
+    <tr>
+        <td style="width:65%;">&nbsp;</td>
+        <td>&nbsp;<br><span class="small">Zakładowy opiekun praktyki zawodowej<br>(data, pieczęć i podpis)</span></td>
+    </tr>
+</table>
+
+<p style="font-size:11px;margin:14px 0 4px;">
+    Ocena parametryczna (w skali 2 do 5): &nbsp;
+    <strong>{{ p.ocena or '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' }}</strong>
+</p>
+<p style="font-size:11px;margin:0 0 2px;">Ocena opisowa:</p>
+<div style="font-size:11px;min-height:48px;border-bottom:1px solid #ccc;margin-bottom:14px;padding-bottom:4px;line-height:1.7;">
+    {{ (p.komentarz_promotora or '')|replace('\n','<br>')|safe }}
+</div>
+
+<table class="sign">
+    <tr>
+        <td style="width:65%;">&nbsp;</td>
+        <td>&nbsp;<br><span class="small">Uczelniany opiekun praktyki zawodowej<br>(data, pieczęć i podpis)</span></td>
+    </tr>
+</table>
+
+<p style="font-size:11px;margin:14px 0 10px;">
+    Ocena sprawozdania z praktyki (w skali 2 do 5): &nbsp;
+    ………………………………………………………………………………………………………
+</p>
+
+<table class="sign">
+    <tr>
+        <td style="width:65%;">&nbsp;</td>
+        <td>&nbsp;<br><span class="small">(data i podpis uczelnianego opiekuna praktyki)</span></td>
+    </tr>
+</table>
+
 {% endblock %}

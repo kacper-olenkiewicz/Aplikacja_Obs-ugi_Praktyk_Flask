@@ -25,7 +25,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import or_
 
 from config import Config
-from extensions import db, migrate
+from extensions import db, migrate, celery, init_celery
 import models
 
 app = Flask(__name__)
@@ -40,6 +40,7 @@ ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "odt", "jpg", "jpeg", "png"}
 
 db.init_app(app)
 migrate.init_app(app, db)
+init_celery(app)
 
 
 # ---------- pomocnicze ----------
@@ -410,6 +411,7 @@ def profil():
         user.nazwisko = request.form.get("nazwisko", "").strip() or None
         user.nr_albumu = request.form.get("nr_albumu", "").strip() or None
         user.kierunek = request.form.get("kierunek", "").strip() or None
+        user.specjalnosc = request.form.get("specjalnosc", "").strip() or None
         user.rok_studiow = _parse_int(request.form.get("rok_studiow"))
         user.semestr = _parse_int(request.form.get("semestr"))
         user.telefon = request.form.get("telefon", "").strip() or None
@@ -516,12 +518,15 @@ def praktyka_edit(praktyka_id):
         p.tryb_realizacji = request.form.get("tryb_realizacji") or None
         p.harmonogram = request.form.get("harmonogram", "").strip() or None
         p.zakres_zadan = request.form.get("zakres_zadan", "").strip() or None
-        p.sprawozdanie_tresc = request.form.get("sprawozdanie_tresc", "").strip() or None
-        p.sprawozdanie_wnioski = request.form.get("sprawozdanie_wnioski", "").strip() or None
-        p.ankieta_atmosfera = _parse_int(request.form.get("ankieta_atmosfera"))
-        p.ankieta_organizacja = _parse_int(request.form.get("ankieta_organizacja"))
-        p.ankieta_wiedza = _parse_int(request.form.get("ankieta_wiedza"))
-        p.ankieta_komentarz = request.form.get("ankieta_komentarz", "").strip() or None
+        p.sprawozdanie_charakterystyka = request.form.get("sprawozdanie_charakterystyka", "").strip() or None
+        p.sprawozdanie_opis_prac = request.form.get("sprawozdanie_opis_prac", "").strip() or None
+        p.sprawozdanie_samoocena = request.form.get("sprawozdanie_samoocena", "").strip() or None
+        for i in range(1, 15):
+            val = _parse_int(request.form.get(f"ankieta_p{i:02d}"))
+            setattr(p, f"ankieta_p{i:02d}", val)
+        p.ankieta_uwagi = request.form.get("ankieta_uwagi", "").strip() or None
+        p.ankieta_rok_akademicki = request.form.get("ankieta_rok_akademicki", "").strip() or None
+        p.ankieta_forma_studiow = request.form.get("ankieta_forma_studiow", "").strip() or None
         p.bhp_zaakceptowane = bool(request.form.get("bhp_zaakceptowane"))
         p.regulamin_zapoznany = bool(request.form.get("regulamin_zapoznany"))
         p.ubezpieczenie_nnw = bool(request.form.get("ubezpieczenie_nnw"))
@@ -573,7 +578,7 @@ def dziennik(praktyka_id):
                 godz_od=_parse_time(request.form.get("godz_od")),
                 godz_do=_parse_time(request.form.get("godz_do")),
                 opis=opis,
-                efekty=request.form.get("efekty", "").strip() or None,
+                efekty=", ".join(request.form.getlist("efekty")) or None,
             )
             db.session.add(wpis)
             db.session.commit()
@@ -666,15 +671,10 @@ def dokument_usun(praktyka_id, dok_id):
     return redirect(url_for("dokumenty", praktyka_id=p.id))
 
 
-# ---------- PDF ----------
+# ---------- PDF (asynchroniczne przez Celery) ----------
 
 def _fix_xhtml2pdf_windows():
-    """Naprawia blokadę NamedTemporaryFile na Windowsie w xhtml2pdf.
-
-    xhtml2pdf otwiera font przez NamedTemporaryFile i pozostawia go otwartego.
-    Na Windowsie drugi open() tego samego pliku powoduje PermissionError.
-    Poprawka: delete=False + close() po zapisie, żeby ReportLab mógł plik otworzyć.
-    """
+    """Naprawia blokadę NamedTemporaryFile na Windowsie w xhtml2pdf."""
     import tempfile
     import xhtml2pdf.files as xf
 
@@ -684,7 +684,7 @@ def _fix_xhtml2pdf_windows():
         if data:
             tmp_file.write(data)
             tmp_file.flush()
-            tmp_file.close()  # zamknij blokadę — plik pozostaje na dysku
+            tmp_file.close()
         if self.path is None:
             self.path = tmp_file.name
         return tmp_file
@@ -694,50 +694,59 @@ def _fix_xhtml2pdf_windows():
 
 _fix_xhtml2pdf_windows()
 
-
-def _render_pdf(template, filename, **ctx):
-    from xhtml2pdf import pisa
-
-    static_root = app.static_folder
-
-    def link_callback(uri, rel):
-        if uri.startswith("/static/"):
-            return os.path.join(static_root, uri[len("/static/"):].replace("/", os.sep))
-        return uri
-
-    html = render_template(template, **ctx)
-    buf = io.BytesIO()
-    result = pisa.CreatePDF(src=html, dest=buf, encoding="utf-8",
-                            link_callback=link_callback)
-    if result.err:
-        abort(500)
-    buf.seek(0)
-    return send_file(buf, mimetype="application/pdf", as_attachment=True, download_name=filename)
+VALID_PDF_KINDS = {"karta", "dziennik", "sprawozdanie", "ankieta", "program", "efekty"}
 
 
 @app.route("/praktyki/<int:praktyka_id>/pdf/<kind>")
 @login_required
 def praktyka_pdf(praktyka_id, kind):
+    from tasks import generate_pdf as _task
     p = _get_own_praktyka(praktyka_id)
-    wpisy = p.wpisy_dziennika.all()
-    suma_godzin = sum(w.liczba_godzin or 0 for w in wpisy)
-
-    mapping = {
-        "karta": ("pdf/karta.html", f"karta_praktyki_{p.id}.pdf"),
-        "dziennik": ("pdf/dziennik.html", f"dziennik_praktyki_{p.id}.pdf"),
-        "sprawozdanie": ("pdf/sprawozdanie.html", f"sprawozdanie_praktyki_{p.id}.pdf"),
-        "ankieta": ("pdf/ankieta.html", f"ankieta_praktyki_{p.id}.pdf"),
-        "program": ("pdf/program.html", f"program_harmonogram_{p.id}.pdf"),
-    }
-    if kind not in mapping:
+    if kind not in VALID_PDF_KINDS:
         abort(404)
-    template, filename = mapping[kind]
-    return _render_pdf(
-        template, filename,
-        p=p, student=p.student, promotor=p.promotor,
-        wpisy=wpisy, suma_godzin=suma_godzin,
-        today=date.today(),
-    )
+    user = current_user()
+    task = _task.delay(praktyka_id=p.id, kind=kind, user_id=user.id)
+    from flask import jsonify
+    return jsonify({"task_id": task.id})
+
+
+@app.route("/wnioski/<int:wniosek_id>/pdf")
+@login_required
+def wniosek_pdf(wniosek_id):
+    from tasks import generate_wniosek_pdf as _task
+    w = _get_own_wniosek(wniosek_id)
+    user = current_user()
+    task = _task.delay(wniosek_id=w.id, user_id=user.id)
+    from flask import jsonify
+    return jsonify({"task_id": task.id})
+
+
+@app.route("/pdf/status/<task_id>")
+@login_required
+def pdf_status(task_id):
+    import redis as redis_lib
+    from flask import jsonify
+    from celery.result import AsyncResult
+    result = AsyncResult(task_id, app=celery)
+    state = result.state  # PENDING / SUCCESS / FAILURE
+    ready = state == "SUCCESS"
+    failed = state == "FAILURE"
+    return jsonify({"state": state, "ready": ready, "failed": failed})
+
+
+@app.route("/pdf/download/<task_id>")
+@login_required
+def pdf_download(task_id):
+    import redis as redis_lib
+    r = redis_lib.Redis.from_url(app.config["REDIS_URL"])
+    pdf_bytes = r.get(f"pdf_result:{task_id}")
+    filename = r.get(f"pdf_filename:{task_id}")
+    if not pdf_bytes:
+        abort(404)
+    filename = filename.decode() if filename else "dokument.pdf"
+    buf = io.BytesIO(pdf_bytes)
+    return send_file(buf, mimetype="application/pdf",
+                     as_attachment=True, download_name=filename)
 
 
 OCENY = ["2", "3", "3+", "4", "4+", "5"]
@@ -1084,6 +1093,7 @@ def admin_user_edit(user_id):
         u.nazwisko = request.form.get("nazwisko", "").strip() or None
         u.nr_albumu = request.form.get("nr_albumu", "").strip() or None
         u.kierunek = request.form.get("kierunek", "").strip() or None
+        u.specjalnosc = request.form.get("specjalnosc", "").strip() or None
         u.rok_studiow = _parse_int(request.form.get("rok_studiow"))
         u.semestr = _parse_int(request.form.get("semestr"))
         u.telefon = request.form.get("telefon", "").strip() or None
@@ -1161,6 +1171,13 @@ def promotor_zopz(praktyka_id):
     p = _get_promotor_praktyka(praktyka_id)
     p.dziennik_potwierdzony_zopz = bool(request.form.get("dziennik_potwierdzony_zopz"))
     p.sprawozdanie_podpisane_zopz = bool(request.form.get("sprawozdanie_podpisane_zopz"))
+    p.efekty_potwierdzone_zopz = bool(request.form.get("efekty_potwierdzone_zopz"))
+    ocena_par = _parse_int(request.form.get("ocena_zopz_parametryczna"))
+    if ocena_par and 1 <= ocena_par <= 5:
+        p.ocena_zopz_parametryczna = ocena_par
+    elif not request.form.get("ocena_zopz_parametryczna"):
+        p.ocena_zopz_parametryczna = None
+    p.ocena_zopz_opisowa = request.form.get("ocena_zopz_opisowa", "").strip() or None
     db.session.commit()
     flash("Potwierdzenia ZOPZ zapisane.", "info")
     return redirect(url_for("promotor_praktyka", praktyka_id=p.id))

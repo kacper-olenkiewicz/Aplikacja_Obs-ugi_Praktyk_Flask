@@ -81,15 +81,20 @@
     </dl>
 </div>
 
-{% if p.sprawozdanie_tresc or p.sprawozdanie_wnioski %}
+{% if p.sprawozdanie_charakterystyka or p.sprawozdanie_opis_prac or p.sprawozdanie_samoocena %}
 <div class="panel">
     <h2>Sprawozdanie studenta</h2>
-    {% if p.sprawozdanie_tresc %}
-        <p style="margin:0 0 10px;">{{ p.sprawozdanie_tresc|replace('\n','<br>')|safe }}</p>
+    {% if p.sprawozdanie_charakterystyka %}
+        <h3 style="font-size:14px;margin:0 0 6px;">I. Charakterystyka miejsca odbywania praktyki</h3>
+        <p style="margin:0 0 10px;">{{ p.sprawozdanie_charakterystyka|replace('\n','<br>')|safe }}</p>
     {% endif %}
-    {% if p.sprawozdanie_wnioski %}
-        <h3 style="font-size:14px;margin:12px 0 6px;">Wnioski</h3>
-        <p style="margin:0;">{{ p.sprawozdanie_wnioski|replace('\n','<br>')|safe }}</p>
+    {% if p.sprawozdanie_opis_prac %}
+        <h3 style="font-size:14px;margin:12px 0 6px;">II. Opis i analiza wykonywanych prac</h3>
+        <p style="margin:0 0 10px;">{{ p.sprawozdanie_opis_prac|replace('\n','<br>')|safe }}</p>
+    {% endif %}
+    {% if p.sprawozdanie_samoocena %}
+        <h3 style="font-size:14px;margin:12px 0 6px;">III. Wiedza i umiejętności uzyskane w trakcie praktyki</h3>
+        <p style="margin:0;">{{ p.sprawozdanie_samoocena|replace('\n','<br>')|safe }}</p>
     {% endif %}
 </div>
 {% endif %}
@@ -303,22 +308,42 @@
 <div class="panel">
     <h2>Potwierdzenia ZOPZ</h2>
     <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">
-        Opiekun zakładowy (ZOPZ) potwierdza prowadzenie dokumentacji praktyki.
+        Opiekun zakładowy (ZOPZ) potwierdza prowadzenie dokumentacji i wystawia ocenę na karcie praktyki.
     </p>
     <form method="post" action="{{ url_for('promotor_zopz', praktyka_id=p.id) }}">
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
             <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
                 <input type="checkbox" name="dziennik_potwierdzony_zopz" value="1" style="margin-top:2px;"
                        {% if p.dziennik_potwierdzony_zopz %}checked{% endif %}>
-                Dziennik praktyki potwierdzony przez ZOPZ (Dokumentowanie pkt 4a)
+                Dziennik praktyki potwierdzony przez ZOPZ (Zał. 6 / Dokumentowanie pkt 4a)
             </label>
             <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
                 <input type="checkbox" name="sprawozdanie_podpisane_zopz" value="1" style="margin-top:2px;"
                        {% if p.sprawozdanie_podpisane_zopz %}checked{% endif %}>
-                Sprawozdanie podpisane przez ZOPZ (Dokumentowanie pkt 4b)
+                Sprawozdanie podpisane przez ZOPZ (Zał. 7 / Dokumentowanie pkt 4b)
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="efekty_potwierdzone_zopz" value="1" style="margin-top:2px;"
+                       {% if p.efekty_potwierdzone_zopz %}checked{% endif %}>
+                Potwierdzenie efektów uczenia się (a–k) podpisane przez ZOPZ (Zał. 4 / Dokumentowanie pkt 4d)
             </label>
         </div>
-        <button class="btn btn-ghost btn-sm" type="submit">Zapisz potwierdzenia</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div class="field" style="margin:0;">
+                <label style="font-size:12px;">Ocena parametryczna ZOPZ (1–5)</label>
+                <select name="ocena_zopz_parametryczna" style="font-size:13px;">
+                    <option value="">—</option>
+                    {% for i in range(1,6) %}
+                        <option value="{{ i }}" {% if p.ocena_zopz_parametryczna == i %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+            <label style="font-size:12px;">Ocena opisowa ZOPZ</label>
+            <textarea name="ocena_zopz_opisowa" rows="3" style="font-size:13px;">{{ p.ocena_zopz_opisowa or '' }}</textarea>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="submit">Zapisz potwierdzenia ZOPZ</button>
     </form>
 </div>
 {% endif %}
@@ -366,11 +391,12 @@
 <div class="panel">
     <h2>Pobierz PDF</h2>
     <div style="display:flex;flex-direction:column;gap:6px;">
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta') }}">Karta praktyki</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Dziennik</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='sprawozdanie') }}">Sprawozdanie</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='ankieta') }}">Ankieta</a>
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='program') }}">Program i harmonogram (Zał. 2a)</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta') }}">Karta praktyki</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Dziennik</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='sprawozdanie') }}">Sprawozdanie</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='ankieta') }}">Ankieta</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='program') }}">Program i harmonogram (Zał. 2a)</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='efekty') }}">Potwierdzenie efektów uczenia się (Zał. 4)</a>
     </div>
 </div>
 

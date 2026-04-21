@@ -3,18 +3,17 @@
 {% block doc_subtitle %}Załącznik nr 2a do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
 {% block body %}
 
-<h2>1. Dane studenta</h2>
-<table class="kv">
-    <tr><td class="k">Imię i nazwisko</td><td>{{ student.pelne_imie }}</td></tr>
-    <tr><td class="k">Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
-    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
-    <tr><td class="k">Rok / semestr</td><td>{{ student.rok_studiow or '' }} / {{ student.semestr or '' }}</td></tr>
-</table>
+<p style="font-size:11px;margin:0 0 6px;">
+    <strong>Akademia Nauk Stosowanych w Elblągu</strong><br>
+    Instytut Informatyki Stosowanej im. Krzysztofa Brzeskiego &nbsp;·&nbsp; Kierunek studiów: Informatyka
+</p>
 
-<h2>2. Miejsce odbywania praktyki</h2>
 <table class="kv">
-    <tr><td class="k">Nazwa firmy / instytucji</td><td>{{ p.firma_nazwa }}</td></tr>
-    <tr><td class="k">Adres</td><td>{{ p.firma_adres or '' }}</td></tr>
+    <tr><td class="k">Student / ka</td><td>{{ student.pelne_imie }}</td></tr>
+    <tr><td class="k">Nr albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">Kierunek studiów</td><td>{{ student.kierunek or 'Informatyka' }}</td></tr>
+    <tr><td class="k">Specjalność</td><td>{{ student.specjalnosc or '' }}</td></tr>
+    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</td></tr>
     <tr><td class="k">Profil działalności</td><td>{{ p.firma_profil or '' }}</td></tr>
     <tr><td class="k">Opiekun zakładowy (ZOPZ)</td>
         <td>
@@ -22,42 +21,144 @@
             {% if p.opiekun_zakladowy_stanowisko %}, {{ p.opiekun_zakladowy_stanowisko }}{% endif %}
             {% if p.opiekun_zakladowy_wyksztalcenie %}<br>Wykształcenie: {{ p.opiekun_zakladowy_wyksztalcenie }}{% endif %}
         </td></tr>
-</table>
-
-<h2>3. Terminy realizacji</h2>
-<table class="kv">
-    <tr><td class="k">Rok akademicki</td><td>{{ p.rok_akademicki or '' }}</td></tr>
-    <tr><td class="k">Semestry</td><td>{{ p.semestr_od or '' }} – {{ p.semestr_do or '' }}</td></tr>
-    <tr><td class="k">Data rozpoczęcia</td><td>{{ p.data_od|pl_date }}</td></tr>
-    <tr><td class="k">Data zakończenia</td><td>{{ p.data_do|pl_date }}</td></tr>
-    <tr><td class="k">Wymiar godzin (plan)</td><td>{{ p.liczba_godzin or '' }} h / wymagane 960 h</td></tr>
-    <tr><td class="k">Tryb realizacji</td>
-        <td>
-            {% if p.tryb_realizacji == 'ciagla' %}Ciągła
-            {% elif p.tryb_realizacji == 'etapowa' %}Etapowa
-            {% else %}—{% endif %}
+    <tr><td class="k">Termin realizacji</td>
+        <td>od {{ p.data_od|pl_date }} &nbsp; do {{ p.data_do|pl_date }}
+            &nbsp;&nbsp;&nbsp; <strong>Liczba dni roboczych: 120</strong>
         </td></tr>
+    <tr><td class="k">Rok akademicki</td><td>{{ p.rok_akademicki or '' }}</td></tr>
 </table>
 
-<h2>4. Program praktyki (zakres zadań)</h2>
-<div class="block">{{ (p.zakres_zadan or '')|replace('\n','<br>')|safe }}</div>
+<h2>Program Praktyki Zawodowej</h2>
 
-<h2>5. Harmonogram realizacji</h2>
-<div class="block">{{ (p.harmonogram or '')|replace('\n','<br>')|safe }}</div>
+<table class="tbl">
+    <thead>
+        <tr>
+            <th style="width:5%;text-align:center;">Nr</th>
+            <th style="width:47%;">Efekty kształcenia</th>
+            <th>Dział (komórka) / przykładowe prace wykonywane przez praktykanta</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">01</td>
+            <td>Ma wiedzę na temat sposobu realizacji zadań inżynierskich dotyczących informatyki z zachowaniem standardów i norm technicznych.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">02</td>
+            <td>Zna technologie, narzędzia, metody, techniki oraz sprzęt stosowane w informatyce.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">03</td>
+            <td>Zna ekonomiczne, prawne skutki własnych działań podejmowanych w ramach praktyki oraz ograniczenia wynikające z prawa autorskiego i kodeksu pracy.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">04</td>
+            <td>Zna zasady bezpieczeństwa pracy i ergonomii w zawodzie informatyka.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">05</td>
+            <td>Pozyskuje informacje odnośnie technologii, metod, technik, sprzętu wymaganego do realizacji powierzonego zadania, posługując się rozmaitymi źródłami literaturowymi i zasobami publikowanymi w języku polskim jak i angielskim.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">06</td>
+            <td>W oparciu o kontakty ze środowiskiem inżynierskim zakładu, potrafi podnieść swoje kompetencje, wiedzę i umiejętności, co najmniej z dwóch zakresów: zadania dotyczące sprzętu i oprogramowania (np. programowania, administrowanie siecią komputerową, konserwacja sprzętu i oprogramowania, bieżące usuwanie usterek, administrowanie zasobami informatycznymi zakładu pracy / instytucji, e-usługami).</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">07</td>
+            <td>Opracowuje dokumentację dotyczącą realizacji podejmowanych zadań w ramach praktyki, a także referuje ustnie prezentowane w niej zagadnienia.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">08</td>
+            <td>Potrafi zidentyfikować problem informatyczny występujący w zakładzie pracy / instytucji, opisać go, przedstawić koncepcję rozwiązania i ją zrealizować.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">09</td>
+            <td>Potrafi rozwiązać rzeczywiste zadanie inżynierskie z zakresu działalności informatycznej zakładu pracy / instytucji stosując normy i standardy stosowane w informatyce oraz biorąc pod uwagę aspekty środowiskowe i etyczne.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">10</td>
+            <td>Pracuje w zespole zajmującym się zawodowo branżą IT.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">11</td>
+            <td>Przestrzega zasad etyki zawodowej i zgodnie z tymi zasadami korzysta z wiedzy i pomocy doświadczonych kolegów.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">12</td>
+            <td>Kontaktując się z osobami spoza branży potrafi zarówno pozyskać od nich niezbędne informacje do realizacji planowanego zadania, jak i przekazać im w sposób zrozumiały informacje i opinie z zakresu informatyki.</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-weight:bold;">13</td>
+            <td>Dostrzega w praktyce tempo deaktualizacji wiedzy informatycznej oraz skutki działalności informatyków w szczególności ekonomiczne i społeczne.</td>
+            <td>&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
 
-<h2>6. Uzgodnienie</h2>
-<p class="small">
-    Program i harmonogram praktyki zostały uzgodnione pomiędzy studentem, Uczelnianym opiekunem praktyk zawodowych (UOPZ)
-    oraz Zakładowym opiekunem praktyki zawodowej (ZOPZ) zgodnie z §3 pkt 5 Regulaminu praktyk zawodowych.
-</p>
+{% if p.zakres_zadan %}
+<p style="font-size:11px;margin:8px 0 0;"><strong>Dodatkowe uwagi / zakres zadań:</strong><br>
+{{ p.zakres_zadan|replace('\n','<br>')|safe }}</p>
+{% endif %}
 
-<table class="sign">
+<h2 style="margin-top:18px;">Harmonogram Praktyki Zawodowej</h2>
+
+<table class="tbl">
+    <thead>
+        <tr>
+            <th style="width:6%;text-align:center;">L.p.</th>
+            <th>Dział / komórka (miejsce odbywania praktyki)</th>
+            <th style="width:22%;text-align:center;">Planowana liczba dni roboczych</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if p.harmonogram %}
+        {# wolny tekst harmonogramu z systemu #}
+        <tr>
+            <td colspan="3" style="padding:6px 8px;font-size:11px;white-space:pre-wrap;">{{ p.harmonogram }}</td>
+        </tr>
+        {% else %}
+        {% for i in range(1, 14) %}
+        <tr style="height:22px;">
+            <td style="text-align:center;">{{ i }}</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        <tr style="background:#eee;font-weight:bold;">
+            <td colspan="2" style="text-align:right;padding-right:12px;">Łącznie</td>
+            <td style="text-align:center;"></td>
+        </tr>
+        <tr style="background:#eee;font-weight:bold;">
+            <td colspan="2" style="text-align:right;padding-right:12px;">Wymagana</td>
+            <td style="text-align:center;">120</td>
+        </tr>
+    </tbody>
+</table>
+
+<p style="font-size:11px;margin:14px 0 4px;">Uzgodniono w dniu: ………………………………………</p>
+
+<table class="sign" style="margin-top:20px;">
     <tr>
-        <td>{{ today|pl_date }}<br><span class="small">data i podpis studenta</span></td>
-        <td>&nbsp;<br><span class="small">podpis UOPZ (promotor uczelniany)</span></td>
+        <td>&nbsp;<br><span class="small">podpis uczelnianego opiekuna praktyki (UOPZ)</span></td>
+        <td>&nbsp;<br><span class="small">podpis zakładowego opiekuna praktyki (ZOPZ)</span></td>
     </tr>
     <tr>
-        <td colspan="2" style="padding-top:40px;"><span class="small">podpis ZOPZ (opiekun zakładowy)</span></td>
+        <td colspan="2" style="padding-top:36px;text-align:center;">
+            &nbsp;<br><span class="small">podpis studenta</span>
+        </td>
     </tr>
 </table>
 {% endblock %}

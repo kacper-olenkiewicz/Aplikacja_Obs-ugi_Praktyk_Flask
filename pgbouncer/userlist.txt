@@ -1,0 +1,5 @@
+# Format: "user" "password"
+# Hasło musi być MD5 lub SCRAM-SHA-256, albo plaintext (tylko dev)
+# W Dockerze uzupełniamy przez entrypoint.sh lub bezpośrednio tu.
+# Przykład plaintext (do zastąpienia w produkcji MD5):
+"praktyki" "haslo"

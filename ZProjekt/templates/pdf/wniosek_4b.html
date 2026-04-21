@@ -1,0 +1,119 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}WNIOSEK O UBIEGANIE SIĘ ZALICZENIA EFEKTÓW UCZENIA SIĘ{% endblock %}
+{% block doc_subtitle %}Załącznik nr 4b do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block body %}
+
+<p style="font-size:10px;text-align:right;margin:0 0 2px;">Elbląg dnia {{ today|pl_date }}</p>
+
+{# ── DANE STUDENTA ────────────────────────────────────────────────────────── #}
+<p style="font-size:11px;margin:0 0 2px;">Kierunek studiów: {{ student.kierunek or 'Informatyka' }}</p>
+<p style="font-size:11px;margin:0 0 2px;">Student / ka: <strong>{{ student.pelne_imie }}</strong></p>
+<p style="font-size:11px;margin:0 0 2px;">Nr albumu: {{ student.nr_albumu or '' }}</p>
+<p style="font-size:11px;margin:0 0 2px;">Kierunek studiów: {{ student.kierunek or 'Informatyka' }}</p>
+<p style="font-size:11px;margin:0 0 10px;">Specjalność: {{ student.specjalnosc or '' }}</p>
+
+{# ── ADRESAT ──────────────────────────────────────────────────────────────── #}
+<p style="font-size:10.5px;text-align:right;margin:0 0 12px;line-height:1.6;">
+    Dyrektor Instytutu Informatyki Stosowanej<br>
+    im. Krzysztofa Brzeskiego<br>
+    Za pośrednictwem Komisji do spraw praktyki zawodowej<br>
+    dla kierunku studiów informatyka
+</p>
+
+{# ── TYTUŁ ────────────────────────────────────────────────────────────────── #}
+<p style="font-size:11.5px;font-weight:bold;text-align:center;text-transform:uppercase;margin:0 0 4px;line-height:1.5;">
+    Wniosek o ubieganie się zaliczenia efektów uczenia się przewidzianych<br>
+    dla praktyki zawodowej na podstawie<br>
+    {% if w.typ == 'praca_zawodowa' %}<u>pracy zawodowej</u>{% else %}pracy zawodowej{% endif %} /
+    {% if w.typ == 'staz' %}<u>stażu</u>{% else %}stażu{% endif %} /
+    {% if w.typ == 'dzialalnosc' %}<u>działalności gospodarczej</u>{% else %}działalności gospodarczej{% endif %}*
+</p>
+<p style="font-size:10.5px;font-weight:bold;text-align:center;margin:0 0 10px;">Wniosek</p>
+
+{# ── TREŚĆ ────────────────────────────────────────────────────────────────── #}
+<p style="font-size:11px;line-height:1.7;margin:0 0 8px;">
+    Na podstawie § 4, ustęp 1 i 2 Regulaminu praktyk zawodowych w Instytucie Informatyki Stosowanej
+    im. Krzysztofa Brzeskiego ANS w Elblągu proszę o uznanie efektów uczenia się przewidzianych dla
+    praktyki zawodowej na podstawie
+    {% if w.typ == 'praca_zawodowa' %}<u>pracy zawodowej</u>{% else %}pracy zawodowej{% endif %} /
+    {% if w.typ == 'staz' %}<u>stażu</u>{% else %}stażu{% endif %} /
+    {% if w.typ == 'dzialalnosc' %}<u>działalności gospodarczej</u>{% else %}działalności gospodarczej{% endif %}*.
+</p>
+
+<p style="font-size:11px;margin:0 0 2px;">
+    Uzasadnienie
+    {% if w.uzasadnienie %}
+        <strong>{{ w.uzasadnienie|replace('\n',' ')|safe }}</strong>
+    {% else %}
+        ………………………………………………………………………………………………………………………………………………………
+    {% endif %}
+</p>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:3px;"></div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:3px;"></div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:10px;"></div>
+
+<p style="font-size:11px;margin:0 0 6px;line-height:1.6;">
+    Dla potwierdzenia uzyskania zakładanych dla praktyki zawodowej efektów uczenia się załączam
+    n/w dokumenty potwierdzające zakres realizowanych czynności zawodowych oraz czas ich realizacji,
+    w tym w szczególności:
+</p>
+<ol style="font-size:11px;margin:0 0 10px;padding-left:20px;line-height:1.7;">
+    <li>Umowę o pracę, zaświadczenie o odbyciu stażu lub wolontariatu</li>
+    <li>Opis zajmowanego stanowiska pracy / kartę stanowiskową</li>
+    <li>Zakres obowiązków realizowany w ramach stażu / wolontariatu</li>
+    <li>Zaświadczenie z CEIDG lub KRS</li>
+    <li>Inne dokumenty potwierdzające uzyskanie efektów uczenia się przewidzianych dla praktyki zawodowej</li>
+</ol>
+
+<p style="font-size:11px;text-align:right;margin:0 0 2px;">………………………………………………….&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p style="font-size:10px;text-align:right;margin:0 0 16px;color:#555;">Data i podpis studenta / ki</p>
+
+<hr style="border:none;border-top:1px dashed #ccc;margin:14px 0;">
+
+{# ── OPINIA KOMISJI ───────────────────────────────────────────────────────── #}
+<p style="font-size:11px;font-weight:bold;margin:0 0 4px;">Opinia Komisji ds. praktyk zawodowych</p>
+<div style="font-size:11px;min-height:44px;border-bottom:1px solid #ccc;margin-bottom:3px;padding-bottom:4px;line-height:1.8;">
+    {{ (w.komentarz_komisji or '')|replace('\n','<br>')|safe }}
+</div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:3px;"></div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:10px;"></div>
+
+<p style="font-size:11px;margin:0 0 2px;">
+    {% if w.data_oceny_komisji %}{{ w.data_oceny_komisji|pl_date }}&nbsp;&nbsp;&nbsp;&nbsp;{% endif %}
+    …………………………………………………………………………………………….
+</p>
+<p style="font-size:10px;color:#555;margin:0 0 14px;">data i podpis Przewodniczącego Komisji ds. praktyk zawodowych</p>
+
+<hr style="border:none;border-top:1px dashed #ccc;margin:14px 0;">
+
+{# ── DECYZJA DYREKTORA ────────────────────────────────────────────────────── #}
+<p style="font-size:11px;font-weight:bold;margin:0 0 6px;">
+    Decyzja Dyrektora Instytutu Informatyki Stosowanej im. Krzysztofa Brzeskiego:
+</p>
+<p style="font-size:11px;margin:0 0 3px;line-height:1.7;">
+    {% if w.decyzja_dyrektora == 'zatwierdzona' %}<u><strong>Wyrażam zgodę na uznanie efektów uczenia się przewidzianych dla praktyki zawodowej*</strong></u>
+    {% else %}Wyrażam zgodę na uznanie efektów uczenia się przewidzianych dla praktyki zawodowej*{% endif %}
+</p>
+<p style="font-size:11px;margin:0 0 3px;line-height:1.5;">
+    Wyrażam zgodę na częściowe zaliczenie efektów uczenia się przewidzianych dla praktyki zawodowej
+    i wskazuję na konieczność dodatkowego zaliczenia n/w efektów uczenia się*
+</p>
+<div style="font-size:11px;min-height:32px;border-bottom:1px solid #ccc;margin-bottom:3px;padding-bottom:4px;line-height:1.8;">
+    {{ (w.komentarz_dyrektora or '')|replace('\n','<br>')|safe }}
+</div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:3px;"></div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:6px;"></div>
+<p style="font-size:11px;margin:0 0 10px;">
+    {% if w.decyzja_dyrektora == 'odrzucona' %}<u><strong>Nie wyrażam zgody na zaliczenie efektów uczenia się przewidzianych dla praktyki zawodowej.</strong></u>
+    {% else %}Nie wyrażam zgody na zaliczenie efektów uczenia się przewidzianych dla praktyki zawodowej.{% endif %}
+</p>
+
+<p style="font-size:11px;margin:0 0 2px;">
+    {% if w.data_decyzji %}{{ w.data_decyzji|pl_date }}&nbsp;&nbsp;&nbsp;&nbsp;{% endif %}
+    …………………………………………………………………………………………….
+</p>
+<p style="font-size:10px;color:#555;margin:0;">data i podpis Dyrektora IIS im. K. Brzeskiego</p>
+
+<p style="font-size:9px;color:#666;margin:10px 0 0;">*) niewłaściwe skreślić</p>
+
+{% endblock %}

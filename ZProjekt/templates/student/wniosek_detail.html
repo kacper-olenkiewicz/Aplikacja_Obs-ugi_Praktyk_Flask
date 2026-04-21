@@ -10,7 +10,10 @@
             · {{ w.typ_label }} · złożony {{ w.created_at|pl_date }}
         </p>
     </div>
-    <a class="btn btn-ghost" href="{{ url_for('wnioski_list') }}">← Wnioski</a>
+    <div style="display:flex;gap:8px;">
+        <a class="btn btn-secondary" data-pdf href="{{ url_for('wniosek_pdf', wniosek_id=w.id) }}">Pobierz PDF (Zał. 4b)</a>
+        <a class="btn btn-ghost" href="{{ url_for('wnioski_list') }}">← Wnioski</a>
+    </div>
 </div>
 
 <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">

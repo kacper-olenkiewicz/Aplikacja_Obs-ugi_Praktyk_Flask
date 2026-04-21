@@ -36,5 +36,57 @@
         <small>Rozliczanie praktyk zawodowych · ANS w Elblągu</small>
     </footer>
 {% endblock %}
+
+<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:8px;padding:32px 40px;text-align:center;min-width:260px;">
+    <div class="pdf-spinner" style="width:36px;height:36px;border:4px solid #e0e0e0;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;"></div>
+    <p style="margin:0;font-size:15px;color:#333;">Generowanie PDF&hellip;</p>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script>
+(function () {
+  function startPdfDownload(url) {
+    var overlay = document.getElementById('pdf-overlay');
+    overlay.style.display = 'flex';
+
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.task_id) { overlay.style.display = 'none'; return; }
+        poll(data.task_id);
+      })
+      .catch(function () { overlay.style.display = 'none'; alert('Błąd generowania PDF.'); });
+  }
+
+  function poll(taskId) {
+    fetch('/pdf/status/' + taskId)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ready) {
+          document.getElementById('pdf-overlay').style.display = 'none';
+          window.location.href = '/pdf/download/' + taskId;
+        } else if (data.failed) {
+          document.getElementById('pdf-overlay').style.display = 'none';
+          alert('Błąd podczas generowania PDF.');
+        } else {
+          setTimeout(function () { poll(taskId); }, 1200);
+        }
+      })
+      .catch(function () {
+        document.getElementById('pdf-overlay').style.display = 'none';
+        alert('Błąd połączenia.');
+      });
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-pdf]');
+    if (!a) return;
+    e.preventDefault();
+    startPdfDownload(a.href);
+  });
+})();
+</script>
 </body>
 </html>

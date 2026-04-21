@@ -1,33 +1,117 @@
 {% extends "pdf/_base.html" %}
-{% block doc_title %}ANKIETA — OCENA MIEJSCA PRAKTYKI{% endblock %}
+{% block doc_title %}KWESTIONARIUSZ ANKIETY{% endblock %}
 {% block doc_subtitle %}Załącznik nr 5 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
 {% block body %}
 
-<table class="kv">
-    <tr><td class="k">Student</td><td>{{ student.pelne_imie }}</td></tr>
-    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
-    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}</td></tr>
-    <tr><td class="k">Termin</td><td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }}</td></tr>
-</table>
+<p style="font-size:12px;font-weight:bold;text-align:center;margin:0 0 4px;line-height:1.5;">
+    Kwestionariusz ankiety oceniający przebieg praktyk zawodowych<br>
+    realizowanych w ramach programów studiów<br>
+    w Instytucie Informatyki Stosowanej im. K. Brzeskiego w Elblągu
+</p>
 
-<h2>Ocena miejsca praktyki (skala 1–5)</h2>
-<table class="tbl">
+<p style="font-size:10.5px;margin:8px 0 8px;line-height:1.6;">
+    W trosce o stałe podnoszenie jakości przebiegu praktyk zawodowych zwracamy się do Pani/Pana
+    z prośbą o wypełnienie anonimowej ankiety dotyczącej praktyk zawodowych, w której należy określić
+    w jakim stopniu zgadza się Pan/Pani z poniższymi stwierdzeniami.
+</p>
+<p style="font-size:10.5px;margin:0 0 8px;">
+    Prosimy zaznaczyć przy każdym pytaniu <strong>X</strong> w wybranym polu odpowiedzi.
+</p>
+
+{% set SKALA = ['zdecydowanie tak', 'raczej tak', 'trudno powiedzieć', 'raczej nie', 'zdecydowanie nie'] %}
+{% set PYTANIA = [
+    'Poznałam/poznałem zasady funkcjonowania instytucji, w której odbywałam/odbywałem praktyki zawodowe.',
+    'Poznałam/poznałem strukturę oraz regulamin organizacyjny instytucji, w której odbywałam/odbywałem praktyki zawodowe.',
+    'Praktyki zawodowe umożliwiły mi pełną realizację ramowego programu praktyk zawodowych przewidzianego w ramach mojego kierunku studiów.',
+    'Podczas praktyk zawodowych zwracano uwagę na przestrzeganie zasad etyki i tajemnicy zawodowej.',
+    'Podczas praktyk miałam/miałem możliwość praktycznego zastosowania wiedzy teoretycznej zdobytej na zajęciach.',
+    'Praktyki zawodowe przyczyniły się do pogłębienia mojej wiedzy i umiejętności zdobytych w trakcie studiów.',
+    'Mogłem liczyć na wsparcie merytoryczne Opiekuna zakładowego praktyk.',
+    'Mogłem liczyć na wsparcie merytoryczne Opiekuna uczelnianego praktyk.',
+    'Opiekun zakładowy odpowiedzialny za praktyki zawodowe w miejscu ich odbywania potrafił prawidłowo zorganizować ich przebieg.',
+    'Podczas praktyk zawodowych miałam/miałem możliwość pozyskiwania materiałów niezbędnych do przygotowania mojej pracy dyplomowej.',
+    'Praktyki zawodowe rozwinęły moje umiejętności skutecznego komunikowania się w sytuacjach zawodowych i pracy w zespole.',
+    'Praktyki zawodowe nauczyły mnie samodzielności i odpowiedzialności podczas wykonywania pracy.',
+    'Liczba godzin realizowana w ramach praktyk zawodowych jest wystarczająca.',
+    'Czy po zakończeniu praktyki zawodowej chciałaby/chciałby Pani/Pan współpracować z instytucją, w której Pani/Pan zrealizowała/zrealizował praktykę?'
+] %}
+
+{% set odpowiedzi = [
+    p.ankieta_p01, p.ankieta_p02, p.ankieta_p03, p.ankieta_p04, p.ankieta_p05,
+    p.ankieta_p06, p.ankieta_p07, p.ankieta_p08, p.ankieta_p09, p.ankieta_p10,
+    p.ankieta_p11, p.ankieta_p12, p.ankieta_p13, p.ankieta_p14
+] %}
+
+<table class="tbl" style="font-size:9.5px;">
     <thead>
-        <tr><th>Obszar</th><th style="width:18%;text-align:center;">Ocena</th></tr>
+        <tr>
+            <th style="width:4%;text-align:center;">Nr</th>
+            <th style="width:40%;">Pytanie</th>
+            <th style="width:11%;text-align:center;">zdecydowanie<br>tak</th>
+            <th style="width:11%;text-align:center;">raczej<br>tak</th>
+            <th style="width:11%;text-align:center;">trudno<br>powiedzieć</th>
+            <th style="width:11%;text-align:center;">raczej<br>nie</th>
+            <th style="width:11%;text-align:center;">zdecydowanie<br>nie</th>
+        </tr>
     </thead>
     <tbody>
-        <tr><td>Atmosfera w miejscu praktyki</td><td style="text-align:center;">{{ p.ankieta_atmosfera or '—' }}</td></tr>
-        <tr><td>Organizacja praktyki</td><td style="text-align:center;">{{ p.ankieta_organizacja or '—' }}</td></tr>
-        <tr><td>Poszerzenie wiedzy i umiejętności</td><td style="text-align:center;">{{ p.ankieta_wiedza or '—' }}</td></tr>
+    {% for i in range(14) %}
+        {% set odp = odpowiedzi[i] %}
+        <tr>
+            <td style="text-align:center;font-weight:bold;">{{ i+1 }}.</td>
+            <td>{{ PYTANIA[i] }}</td>
+            {# skala: 5=zdecydowanie tak, 4=raczej tak, 3=trudno, 2=raczej nie, 1=zdecydowanie nie #}
+            {% for v in [5, 4, 3, 2, 1] %}
+            <td style="text-align:center;">
+                {% if odp == v %}<strong>X</strong>{% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
     </tbody>
 </table>
 
-<h2>Komentarz</h2>
-<div class="block">{{ (p.ankieta_komentarz or '')|replace('\n','<br>')|safe }}</div>
+<p style="font-size:10.5px;margin:10px 0 2px;">
+    <strong>Dodatkowe uwagi dotyczące przebiegu praktyki zawodowej</strong>
+</p>
+<div style="font-size:11px;min-height:32px;border-bottom:1px solid #ccc;margin-bottom:3px;padding-bottom:4px;line-height:1.7;">
+    {{ (p.ankieta_uwagi or '')|replace('\n','<br>')|safe }}
+</div>
+<div style="height:14px;border-bottom:1px solid #ccc;margin-bottom:10px;"></div>
 
-<table class="sign">
-    <tr>
-        <td colspan="2">{{ today|pl_date }}<br><span class="small">podpis studenta</span></td>
-    </tr>
+<p style="font-size:11px;font-weight:bold;margin:0 0 6px;">Metryczka</p>
+<table class="tbl" style="font-size:10.5px;">
+    <tbody>
+        <tr>
+            <td style="width:55%;">Rok akademicki</td>
+            <td>{{ p.ankieta_rok_akademicki or p.rok_akademicki or '' }}</td>
+        </tr>
+        <tr>
+            <td>Kierunek studiów</td>
+            <td>{{ student.kierunek or 'Informatyka' }}</td>
+        </tr>
+        <tr>
+            <td>Forma studiów</td>
+            <td>
+                {% if p.ankieta_forma_studiow %}
+                    {{ p.ankieta_forma_studiow }}
+                {% else %}
+                    stacjonarne / niestacjonarne*
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Semestr studiów</td>
+            <td>{{ student.semestr or '' }}</td>
+        </tr>
+        <tr>
+            <td>Liczba godzin zrealizowanej praktyki zawodowej</td>
+            <td>{{ p.liczba_godzin or suma_godzin|int or '' }}</td>
+        </tr>
+    </tbody>
 </table>
+
+<p style="font-size:9px;color:#666;margin:4px 0 8px;">*) niewłaściwe skreślić</p>
+<p style="font-size:11px;font-weight:bold;text-align:center;margin:10px 0 0;">Dziękujemy za udział w badaniu</p>
+
 {% endblock %}

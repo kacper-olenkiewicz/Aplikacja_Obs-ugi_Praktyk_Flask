@@ -1,28 +1,34 @@
 {% extends "pdf/_base.html" %}
-{% block doc_title %}SPRAWOZDANIE Z PRAKTYKI ZAWODOWEJ{% endblock %}
-{% block doc_subtitle %}Załącznik nr 7 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
+{% block doc_title %}SPRAWOZDANIE STUDENTA Z PRAKTYKI ZAWODOWEJ{% endblock %}
+{% block doc_subtitle %}odbytej w {{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %} &middot; Załącznik nr 7 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
 {% block body %}
 
 <table class="kv">
     <tr><td class="k">Student</td><td>{{ student.pelne_imie }}</td></tr>
-    <tr><td class="k">Numer albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
-    <tr><td class="k">Kierunek / rok / semestr</td><td>{{ student.kierunek or '' }} · {{ student.rok_studiow or '' }} / {{ student.semestr or '' }}</td></tr>
-    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</td></tr>
-    <tr><td class="k">Termin</td><td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }} ({{ p.liczba_godzin or '' }} h)</td></tr>
-    <tr><td class="k">Opiekun zakładowy</td><td>{{ p.opiekun_zakladowy_imie_nazwisko or '' }}</td></tr>
-    <tr><td class="k">Promotor uczelniany</td><td>{{ promotor.pelne_imie if promotor else '' }}</td></tr>
+    <tr><td class="k">Nr albumu</td><td>{{ student.nr_albumu or '' }}</td></tr>
+    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or 'informatyka' }}</td></tr>
+    <tr><td class="k">Specjalność</td><td>{{ student.specjalnosc or '' }}</td></tr>
+    <tr><td class="k">Studia</td><td>inżynierskie stacjonarne</td></tr>
+    <tr><td class="k">Rok akademicki</td><td>{{ p.rok_akademicki or '' }}</td></tr>
+    <tr><td class="k">Termin praktyki</td><td>{{ p.data_od|pl_date }} – {{ p.efektywna_data_do|pl_date }}{% if p.liczba_godzin %} ({{ p.liczba_godzin }} h){% endif %}</td></tr>
 </table>
 
-<h2>Opis przebiegu praktyki</h2>
-<div class="block">{{ (p.sprawozdanie_tresc or '')|replace('\n','<br>')|safe }}</div>
+<h2>I. Charakterystyka miejsca odbywania praktyki</h2>
+<div class="small" style="margin-bottom:4px;">Krótki opis instytucji, w której odbywała się praktyka zawodowa.</div>
+<div class="block">{{ (p.sprawozdanie_charakterystyka or '')|replace('\n','<br>')|safe }}</div>
 
-<h2>Wnioski</h2>
-<div class="block">{{ (p.sprawozdanie_wnioski or '')|replace('\n','<br>')|safe }}</div>
+<h2>II. Opis i analiza wykonywanych prac</h2>
+<div class="small" style="margin-bottom:4px;">Syntetyczny opis wykonanych prac (zdaniem studenta najważniejszych).</div>
+<div class="block">{{ (p.sprawozdanie_opis_prac or '')|replace('\n','<br>')|safe }}</div>
+
+<h2>III. Wiedza i umiejętności uzyskane w trakcie praktyki</h2>
+<div class="small" style="margin-bottom:4px;">Samoocena w zakresie nabytych kompetencji oraz osiągniętych efektów uczenia się.</div>
+<div class="block">{{ (p.sprawozdanie_samoocena or '')|replace('\n','<br>')|safe }}</div>
 
 <table class="sign">
     <tr>
-        <td>{{ today|pl_date }}<br><span class="small">podpis studenta</span></td>
-        <td>&nbsp;<br><span class="small">podpis promotora</span></td>
+        <td style="width:50%;border-top:none;">&nbsp;</td>
+        <td>{{ today|pl_date }}<br><span class="small">data i podpis studenta</span></td>
     </tr>
 </table>
 {% endblock %}

@@ -2,6 +2,54 @@
 {% set nav = 'praktyki' %}
 {% block title %}Dziennik · {{ p.firma_nazwa }}{% endblock %}
 {% block main %}
+<style>
+.efekty-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    background: #fff;
+}
+.efekt-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .12s;
+    line-height: 1.45;
+}
+.efekt-row:hover { background: var(--bg); }
+.efekt-row:has(input:checked) {
+    background: #fdf1f2;
+    outline: 1px solid #f3c5ca;
+}
+.efekt-row input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; accent-color: var(--ans-red); }
+.efekt-nr {
+    flex-shrink: 0;
+    width: 26px;
+    height: 20px;
+    background: #eef0f5;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+.efekt-row:has(input:checked) .efekt-nr {
+    background: var(--ans-red-soft);
+    color: var(--ans-red);
+}
+.efekt-opis { font-size: 13px; color: var(--ink); }
+</style>
 <div class="page-header">
     <div>
         <h1>Dziennik praktyki</h1>
@@ -9,7 +57,7 @@
     </div>
     <div>
         <a class="btn btn-ghost" href="{{ url_for('praktyka_detail', praktyka_id=p.id) }}">← Powrót</a>
-        <a class="btn btn-secondary" href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Pobierz PDF</a>
+        <a class="btn btn-secondary" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Pobierz PDF</a>
     </div>
 </div>
 
@@ -34,8 +82,31 @@
                 <textarea name="opis" rows="3" required></textarea>
             </div>
             <div class="field full">
-                <label>Efekty / uzyskane umiejętności</label>
-                <textarea name="efekty" rows="2"></textarea>
+                <label>Efekty uczenia się</label>
+                <div class="efekty-lista">
+                    {% set efekty_list = [
+                        ("01", "Ma wiedzę na temat sposobu realizacji zadań inżynierskich dotyczących informatyki z zachowaniem standardów i norm technicznych"),
+                        ("02", "Zna technologie, narzędzia, metody, techniki oraz sprzęt stosowane w informatyce"),
+                        ("03", "Zna ekonomiczne, prawne skutki własnych działań podejmowanych w ramach praktyki oraz ograniczenia wynikające z prawa autorskiego i kodeksu pracy"),
+                        ("04", "Zna zasady bezpieczeństwa pracy i ergonomii w zawodzie informatyka"),
+                        ("05", "Pozyskuje informacje odnośnie technologii, metod, technik, sprzętu wymaganego do realizacji powierzonego zadania, posługując się rozmaitymi źródłami literaturowymi i zasobami publikowanymi w języku polskim jak i angielskim"),
+                        ("06", "W oparciu o kontakty ze środowiskiem inżynierskim zakładu, potrafi podnieść swoje kompetencje, wiedzę i umiejętności co najmniej z dwóch zakresów: zadania dotyczące sprzętu i oprogramowania"),
+                        ("07", "Opracowuje dokumentację dotyczącą realizacji podejmowanych zadań w ramach praktyki, a także referuje ustnie prezentowane w niej zagadnienia"),
+                        ("08", "Potrafi zidentyfikować problem informatyczny występujący w zakładzie pracy / instytucji, opisać go, przedstawić koncepcję rozwiązania i ją zrealizować"),
+                        ("09", "Potrafi rozwiązać rzeczywiste zadanie inżynierskie z zakresu działalności informatycznej zakładu pracy/instytucji stosując normy i standardy stosowane w informatyce oraz biorąc pod uwagę aspekty środowiskowe i etyczne"),
+                        ("10", "Pracuje w zespole zajmującym się zawodowo branżą IT"),
+                        ("11", "Przestrzega zasad etyki zawodowej i zgodnie z tymi zasadami korzysta z wiedzy i pomocy doświadczonych kolegów"),
+                        ("12", "Kontaktując się z osobami spoza branży potrafi zarówno pozyskać od nich niezbędne informacje do realizacji planowanego zadania, jak i przekazać im w sposób zrozumiały informacje i opinie z zakresu informatyki"),
+                        ("13", "Dostrzega w praktyce tempo deaktualizacji wiedzy informatycznej oraz skutki działalności informatyków w szczególności ekonomiczne i społeczne")
+                    ] %}
+                    {% for nr, opis in efekty_list %}
+                    <label class="efekt-row">
+                        <input type="checkbox" name="efekty" value="{{ nr }}">
+                        <span class="efekt-nr">{{ nr }}</span>
+                        <span class="efekt-opis">{{ opis }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         <div class="form-actions">
@@ -52,11 +123,12 @@
     {% if wpisy %}
         <table class="table">
             <thead>
-                <tr><th>Data</th><th>Godziny</th><th>Opis czynności</th><th>Efekty</th><th></th></tr>
+                <tr><th>Dzień</th><th>Data</th><th>Godziny</th><th>Opis czynności</th><th>Nr. efektów</th><th></th></tr>
             </thead>
             <tbody>
             {% for w in wpisy %}
                 <tr>
+                    <td>{{ loop.index }}</td>
                     <td>{{ w.data|pl_date }}</td>
                     <td>
                         {% if w.godz_od %}{{ w.godz_od|pl_time }}–{{ w.godz_do|pl_time }}{% endif %}

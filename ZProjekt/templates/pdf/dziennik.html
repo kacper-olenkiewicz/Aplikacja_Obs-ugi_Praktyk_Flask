@@ -3,48 +3,107 @@
 {% block doc_subtitle %}Załącznik nr 6 do Regulaminu praktyk zawodowych ANS w Elblągu{% endblock %}
 {% block body %}
 
-<table class="kv">
-    <tr><td class="k">Student</td><td>{{ student.pelne_imie }} ({{ student.nr_albumu or '' }})</td></tr>
-    <tr><td class="k">Kierunek</td><td>{{ student.kierunek or '' }}</td></tr>
-    <tr><td class="k">Miejsce praktyki</td><td>{{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</td></tr>
-    <tr><td class="k">Okres praktyki</td><td>{{ p.data_od|pl_date }} – {{ p.data_do|pl_date }}</td></tr>
+<p style="font-size:11px;margin:0 0 6px;line-height:1.6;">
+    <strong>Akademia Nauk Stosowanych w Elblągu</strong><br>
+    Instytut Informatyki Stosowanej im. Krzysztofa Brzeskiego
+</p>
+
+<table class="kv" style="margin-bottom:8px;">
+    <tr>
+        <td class="k" style="width:30%;">Student</td>
+        <td>{{ student.pelne_imie }}</td>
+        <td class="k" style="width:15%;">Nr albumu</td>
+        <td>{{ student.nr_albumu or '' }}</td>
+    </tr>
+    <tr>
+        <td class="k">Kierunek</td>
+        <td colspan="3">{{ student.kierunek or 'informatyka' }}</td>
+    </tr>
+    <tr>
+        <td class="k">W zakresie</td>
+        <td colspan="3">{{ student.specjalnosc or '' }}</td>
+    </tr>
+    <tr>
+        <td class="k">Studia</td>
+        <td>inżynierskie, {% if p.ankieta_forma_studiow %}{{ p.ankieta_forma_studiow }}{% else %}stacjonarne{% endif %}</td>
+        <td class="k">Rok ak.</td>
+        <td>{{ p.rok_akademicki or '' }}</td>
+    </tr>
+    <tr>
+        <td class="k">Miejsce odbywania praktyki</td>
+        <td colspan="3">
+            {{ p.firma_nazwa }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}<br>
+            <span style="font-size:9px;color:#666;">(nazwa instytucji – zakładu pracy)</span>
+        </td>
+    </tr>
+    <tr>
+        <td class="k">Data rozpoczęcia praktyki</td>
+        <td>{{ p.data_od|pl_date }}</td>
+        <td class="k">Data zakończenia</td>
+        <td>{{ p.efektywna_data_do|pl_date }}</td>
+    </tr>
 </table>
 
-<h2>Przebieg praktyki</h2>
-<table class="tbl">
+<p style="font-size:11px;font-weight:bold;margin:8px 0 2px;">WYKAZ ZAŁĄCZNIKÓW:</p>
+<p style="font-size:11px;margin:0 0 2px;">…………………………………..………………..………………………………..………………………………..………………..……</p>
+<p style="font-size:11px;margin:0 0 10px;">…………………………………..………………..………………………………..………………………………..………………..……</p>
+
+<table class="tbl" style="font-size:9.5px;">
     <thead>
         <tr>
-            <th style="width:15%">Data</th>
-            <th style="width:12%">Godziny</th>
-            <th style="width:8%">Liczba<br>godzin</th>
-            <th>Opis wykonanych czynności</th>
-            <th style="width:25%">Uzyskane efekty</th>
+            <th style="width:5%;text-align:center;">Dzień</th>
+            <th style="width:12%;text-align:center;">Data</th>
+            <th>Opis wykonanych prac</th>
+            <th style="width:14%;text-align:center;">Nr. efektów<br>uczenia się</th>
+            <th style="width:15%;text-align:center;">Podpis osoby<br>nadzorującej</th>
+        </tr>
+        <tr style="background:#eee;font-size:9px;text-align:center;">
+            <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td>
         </tr>
     </thead>
     <tbody>
     {% for w in wpisy %}
         <tr>
-            <td>{{ w.data|pl_date }}</td>
-            <td>{% if w.godz_od %}{{ w.godz_od|pl_time }}–{{ w.godz_do|pl_time }}{% endif %}</td>
-            <td>{{ w.liczba_godzin or '' }}</td>
-            <td>{{ w.opis|replace('\n','<br>')|safe }}</td>
-            <td>{{ (w.efekty or '')|replace('\n','<br>')|safe }}</td>
+            <td style="text-align:center;">{{ loop.index }}</td>
+            <td style="text-align:center;white-space:nowrap;">{{ w.data|pl_date }}</td>
+            <td>
+                {{ w.opis|replace('\n','<br>')|safe }}
+                {% if w.godz_od %}
+                    <br><span style="font-size:9px;color:#666;">{{ w.godz_od|pl_time }}–{{ w.godz_do|pl_time }}
+                    {% if w.liczba_godzin %}({{ w.liczba_godzin }}h){% endif %}</span>
+                {% endif %}
+            </td>
+            <td style="text-align:center;">{{ (w.efekty or '')|replace('\n',', ')|safe }}</td>
+            <td>&nbsp;</td>
         </tr>
     {% else %}
         <tr><td colspan="5" style="text-align:center;color:#666;">Brak wpisów w dzienniku</td></tr>
     {% endfor %}
-        <tr>
-            <td colspan="2" style="text-align:right;font-weight:bold;background:#eee;">Suma godzin</td>
-            <td style="background:#eee;font-weight:bold;">{{ '%.1f'|format(suma_godzin) }}</td>
-            <td colspan="2" style="background:#eee;"></td>
-        </tr>
     </tbody>
 </table>
+
+<p style="font-size:9px;color:#444;margin:8px 0 4px;line-height:1.5;">
+    <strong>Poz. 1.</strong> Wpis w pozycji „dzień" oznacza kolejny dzień praktyki (jeden ze 120).<br>
+    <strong>Poz. 3.</strong> Wpisy powinny zawierać opis wykonywanych prac, z których powinno wynikać, do nabycia jakich umiejętności
+    studenta prowadzą oraz do nabycia których efektów uczenia się. Unikać skrótowych opisów. Jeżeli wynikiem wykonywanych prac są
+    określone opracowania np. program, zamieścić to jako załącznik do dziennika praktyki.<br>
+    <strong>Poz. 4.</strong> Wpisać numer/numery efektów uczenia się (01–13), do których osiągnięcia prowadzą wykonywane prace.
+</p>
+<p style="font-size:9px;color:#444;margin:0 0 10px;">
+    Każdą stronę dziennika potwierdza zakładowy opiekun praktyki (ZOPZ).
+    W przypadku, gdy prace są wykonywane pod nadzorem innego pracownika zakładu, każdą z wykonanych prac potwierdza
+    osoba nadzorująca (Poz. 5), a całą stronę ZOPZ.
+</p>
+
+<p style="font-size:11px;font-weight:bold;margin:4px 0 2px;">
+    Suma godzin z dziennika: {{ '%.1f'|format(suma_godzin) }} h
+</p>
 
 <table class="sign">
     <tr>
         <td>{{ today|pl_date }}<br><span class="small">podpis studenta</span></td>
-        <td>&nbsp;<br><span class="small">podpis opiekuna zakładowego</span></td>
+        <td>&nbsp;<br><span class="small">podpis zakładowego opiekuna praktyki (ZOPZ)</span></td>
     </tr>
 </table>
+
 {% endblock %}

@@ -1,14 +1,14 @@
 services:
+
+  # ── Baza danych ─────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: praktyki_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-praktyki_db}
-      POSTGRES_USER: ${POSTGRES_USER:-praktyki}
+      POSTGRES_DB:       ${POSTGRES_DB:-praktyki_db}
+      POSTGRES_USER:     ${POSTGRES_USER:-praktyki}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-haslo}
-    ports:
-      - "5433:5432"
     volumes:
       - praktyki_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +16,100 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - backend
+
+# ── Redis — broker Celery + backend wyników ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: praktyki_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - praktyki_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - backend
+
+  # ── Flask + Gunicorn ─────────────────────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ZProjekt/.env
+    environment:
+      DATABASE_URL:           postgresql+psycopg2://${POSTGRES_USER:-praktyki}:${POSTGRES_PASSWORD:-haslo}@postgres:5432/${POSTGRES_DB:-praktyki_db}
+      REDIS_URL:              redis://redis:6379/0
+      CELERY_BROKER_URL:      redis://redis:6379/0
+      CELERY_RESULT_BACKEND:  redis://redis:6379/1
+      SQLALCHEMY_POOL_SIZE:   "5"
+      SQLALCHEMY_MAX_OVERFLOW: "5"
+    volumes:
+      - praktyki_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+
+  # ── Celery worker — generowanie PDF w tle ────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      celery -A celery_worker.celery worker
+      --loglevel=info
+      --concurrency=4
+      --queues=celery
+    restart: unless-stopped
+    env_file: ZProjekt/.env
+    environment:
+      DATABASE_URL:           postgresql+psycopg2://${POSTGRES_USER:-praktyki}:${POSTGRES_PASSWORD:-haslo}@postgres:5432/${POSTGRES_DB:-praktyki_db}
+      REDIS_URL:              redis://redis:6379/0
+      CELERY_BROKER_URL:      redis://redis:6379/0
+      CELERY_RESULT_BACKEND:  redis://redis:6379/1
+    volumes:
+      - praktyki_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ── Nginx — reverse proxy + pliki statyczne ──────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: praktyki_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ZProjekt/static:/app/static:ro
+      - praktyki_uploads:/app/uploads:ro
+    depends_on:
+      - web
+    networks:
+      - frontend
 
 volumes:
   praktyki_pgdata:
+  praktyki_redis_data:
+  praktyki_uploads:
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge

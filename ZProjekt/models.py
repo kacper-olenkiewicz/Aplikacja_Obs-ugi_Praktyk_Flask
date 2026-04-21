@@ -13,6 +13,7 @@ class User(db.Model):
     nazwisko = db.Column(db.String(100))
     nr_albumu = db.Column(db.String(20), index=True)
     kierunek = db.Column(db.String(100))
+    specjalnosc = db.Column(db.String(100))
     rok_studiow = db.Column(db.Integer)
     semestr = db.Column(db.Integer)
     telefon = db.Column(db.String(30))
@@ -93,13 +94,34 @@ class Praktyka(db.Model):
     data_zaliczenia_sem6 = db.Column(db.Date)
     komentarz_zaliczenia_sem6 = db.Column(db.Text)
 
-    sprawozdanie_tresc = db.Column(db.Text)
-    sprawozdanie_wnioski = db.Column(db.Text)
+    ocena_zopz_parametryczna = db.Column(db.Integer)          # 1–5 (Karta / Zał. 3)
+    ocena_zopz_opisowa = db.Column(db.Text)                   # opisowa ocena ZOPZ (Karta / Zał. 3)
+    efekty_potwierdzone_zopz = db.Column(db.Boolean, default=False, nullable=False, server_default="false")  # Zał. 4
 
-    ankieta_atmosfera = db.Column(db.Integer)
-    ankieta_organizacja = db.Column(db.Integer)
-    ankieta_wiedza = db.Column(db.Integer)
-    ankieta_komentarz = db.Column(db.Text)
+    # Sprawozdanie studenta z praktyki (Załącznik nr 7) – trzy sekcje
+    sprawozdanie_charakterystyka = db.Column(db.Text)   # I. Charakterystyka miejsca odbywania praktyki
+    sprawozdanie_opis_prac = db.Column(db.Text)         # II. Opis i analiza wykonywanych prac
+    sprawozdanie_samoocena = db.Column(db.Text)         # III. Wiedza i umiejętności / samoocena efektów
+
+    # Ankieta (Zał. 5) – 14 pytań, skala 1=zdecydowanie nie … 5=zdecydowanie tak
+    ankieta_p01 = db.Column(db.Integer)
+    ankieta_p02 = db.Column(db.Integer)
+    ankieta_p03 = db.Column(db.Integer)
+    ankieta_p04 = db.Column(db.Integer)
+    ankieta_p05 = db.Column(db.Integer)
+    ankieta_p06 = db.Column(db.Integer)
+    ankieta_p07 = db.Column(db.Integer)
+    ankieta_p08 = db.Column(db.Integer)
+    ankieta_p09 = db.Column(db.Integer)
+    ankieta_p10 = db.Column(db.Integer)
+    ankieta_p11 = db.Column(db.Integer)
+    ankieta_p12 = db.Column(db.Integer)
+    ankieta_p13 = db.Column(db.Integer)
+    ankieta_p14 = db.Column(db.Integer)
+    ankieta_uwagi = db.Column(db.Text)
+    # Metryczka ankiety
+    ankieta_rok_akademicki = db.Column(db.String(20))
+    ankieta_forma_studiow = db.Column(db.String(20))   # stacjonarne / niestacjonarne
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

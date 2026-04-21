@@ -139,47 +139,78 @@
 
 {% if p %}
 <div class="panel">
-    <h2>Sprawozdanie z praktyki</h2>
+    <h2>Sprawozdanie studenta z praktyki zawodowej (Zał. 7)</h2>
     <div class="form-grid">
         <div class="field full">
-            <label>Treść sprawozdania</label>
-            <textarea name="sprawozdanie_tresc" rows="6">{{ p.sprawozdanie_tresc or '' }}</textarea>
-            <p class="hint">Opis przebiegu praktyki, zrealizowanych zadań, zdobytych umiejętności.</p>
+            <label>I. Charakterystyka miejsca odbywania praktyki</label>
+            <textarea name="sprawozdanie_charakterystyka" rows="5">{{ p.sprawozdanie_charakterystyka or '' }}</textarea>
+            <p class="hint">Krótki opis instytucji, w której odbywała się praktyka zawodowa.</p>
         </div>
         <div class="field full">
-            <label>Wnioski</label>
-            <textarea name="sprawozdanie_wnioski" rows="4">{{ p.sprawozdanie_wnioski or '' }}</textarea>
+            <label>II. Opis i analiza wykonywanych prac</label>
+            <textarea name="sprawozdanie_opis_prac" rows="6">{{ p.sprawozdanie_opis_prac or '' }}</textarea>
+            <p class="hint">Syntetyczny opis najważniejszych zadań wykonywanych w trakcie praktyki.</p>
+        </div>
+        <div class="field full">
+            <label>III. Wiedza i umiejętności uzyskane w trakcie praktyki</label>
+            <textarea name="sprawozdanie_samoocena" rows="6">{{ p.sprawozdanie_samoocena or '' }}</textarea>
+            <p class="hint">Samoocena w zakresie nabytych kompetencji oraz osiągniętych efektów uczenia się – prosimy cytować po kolei zakładane efekty i wykazać prace prowadzące do ich osiągnięcia.</p>
         </div>
     </div>
 </div>
 
 <div class="panel">
-    <h2>Ankieta (ocena miejsca praktyki 1–5)</h2>
-    <div class="form-grid">
-        <div class="field">
-            <label>Atmosfera w miejscu praktyki</label>
-            <select name="ankieta_atmosfera">
-                <option value="">—</option>
-                {% for i in range(1,6) %}<option value="{{ i }}" {% if p.ankieta_atmosfera==i %}selected{% endif %}>{{ i }}</option>{% endfor %}
-            </select>
+    <h2>Ankieta oceny praktyki (Zał. 5)</h2>
+    <p class="hint">5 = zdecydowanie tak, 4 = raczej tak, 3 = trudno powiedzieć, 2 = raczej nie, 1 = zdecydowanie nie</p>
+    {% set pytania = [
+        (1,  'Poznałam/poznałem zasady funkcjonowania instytucji, w której odbywałam/odbywałem praktyki zawodowe.'),
+        (2,  'Poznałam/poznałem strukturę oraz regulamin organizacyjny instytucji, w której odbywałam/odbywałem praktyki zawodowe.'),
+        (3,  'Praktyki zawodowe umożliwiły mi pełną realizację ramowego programu praktyk zawodowych przewidzianego w ramach mojego kierunku studiów.'),
+        (4,  'Podczas praktyk zawodowych zwracano uwagę na przestrzeganie zasad etyki i tajemnicy zawodowej.'),
+        (5,  'Podczas praktyk miałam/miałem możliwość praktycznego zastosowania wiedzy teoretycznej zdobytej na zajęciach.'),
+        (6,  'Praktyki zawodowe przyczyniły się do pogłębienia mojej wiedzy i umiejętności zdobytych w trakcie studiów.'),
+        (7,  'Mogłem liczyć na wsparcie merytoryczne Opiekuna zakładowego praktyk.'),
+        (8,  'Mogłem liczyć na wsparcie merytoryczne Opiekuna uczelnianego praktyk.'),
+        (9,  'Opiekun zakładowy odpowiedzialny za praktyki zawodowe w miejscu ich odbywania potrafił prawidłowo zorganizować ich przebieg.'),
+        (10, 'Podczas praktyk zawodowych miałam/miałem możliwość pozyskiwania materiałów niezbędnych do przygotowania mojej pracy dyplomowej.'),
+        (11, 'Praktyki zawodowe rozwinęły moje umiejętności skutecznego komunikowania się w sytuacjach zawodowych i pracy w zespole.'),
+        (12, 'Praktyki zawodowe nauczyły mnie samodzielności i odpowiedzialności podczas wykonywania pracy.'),
+        (13, 'Liczba godzin realizowana w ramach praktyk zawodowych jest wystarczająca.'),
+        (14, 'Czy po zakończeniu praktyki zawodowej chciałaby/chciałby Pani/Pan współpracować z instytucją, w której Pani/Pan zrealizowała/zrealizował praktykę?')
+    ] %}
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    {% for nr, tresc in pytania %}
+        {% set fname = 'ankieta_p%02d'|format(nr) %}
+        {% set val = p[fname] if p and p[fname] is defined else none %}
+        <div style="border:1px solid var(--border);border-radius:6px;padding:10px 12px;">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">{{ nr }}. {{ tresc }}</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                {% for v, label in [(5,'zdecydowanie tak'),(4,'raczej tak'),(3,'trudno powiedzieć'),(2,'raczej nie'),(1,'zdecydowanie nie')] %}
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:normal;cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:4px;{% if val == v %}background:var(--ans-red);color:#fff;border-color:var(--ans-red);{% endif %}">
+                    <input type="radio" name="{{ fname }}" value="{{ v }}" style="margin:0;" {% if val == v %}checked{% endif %}>
+                    {{ label }}
+                </label>
+                {% endfor %}
+            </div>
         </div>
-        <div class="field">
-            <label>Organizacja praktyki</label>
-            <select name="ankieta_organizacja">
-                <option value="">—</option>
-                {% for i in range(1,6) %}<option value="{{ i }}" {% if p.ankieta_organizacja==i %}selected{% endif %}>{{ i }}</option>{% endfor %}
-            </select>
-        </div>
-        <div class="field">
-            <label>Poszerzenie wiedzy</label>
-            <select name="ankieta_wiedza">
-                <option value="">—</option>
-                {% for i in range(1,6) %}<option value="{{ i }}" {% if p.ankieta_wiedza==i %}selected{% endif %}>{{ i }}</option>{% endfor %}
-            </select>
-        </div>
+    {% endfor %}
+    </div>
+    <div class="form-grid" style="margin-top:14px;">
         <div class="field full">
-            <label>Komentarz</label>
-            <textarea name="ankieta_komentarz" rows="3">{{ p.ankieta_komentarz or '' }}</textarea>
+            <label>Dodatkowe uwagi</label>
+            <textarea name="ankieta_uwagi" rows="3">{{ p.ankieta_uwagi or '' }}</textarea>
+        </div>
+        <div class="field">
+            <label>Rok akademicki</label>
+            <input name="ankieta_rok_akademicki" value="{{ p.ankieta_rok_akademicki or p.rok_akademicki or '' }}" placeholder="np. 2024/2025">
+        </div>
+        <div class="field">
+            <label>Forma studiów</label>
+            <select name="ankieta_forma_studiow">
+                <option value="">— wybierz —</option>
+                <option value="stacjonarne" {% if p.ankieta_forma_studiow == 'stacjonarne' %}selected{% endif %}>Stacjonarne</option>
+                <option value="niestacjonarne" {% if p.ankieta_forma_studiow == 'niestacjonarne' %}selected{% endif %}>Niestacjonarne</option>
+            </select>
         </div>
     </div>
 </div>
