@@ -36,7 +36,10 @@ def generate_pdf(self, praktyka_id, kind, user_id):
     from datetime import date
 
     KINDS = {
-        "karta": "pdf/karta.html",
+        "karta": "pdf/karta_1.html",
+        "karta_1": "pdf/karta_1.html",
+        "karta_2": "pdf/karta_2.html",
+        "karta_3": "pdf/karta_3.html",
         "dziennik": "pdf/dziennik.html",
         "sprawozdanie": "pdf/sprawozdanie.html",
         "ankieta": "pdf/ankieta.html",
@@ -74,7 +77,12 @@ def generate_pdf(self, praktyka_id, kind, user_id):
     task_key = f"pdf_result:{self.request.id}"
     r.setex(task_key, current_app.config["CELERY_RESULT_EXPIRES"], pdf_bytes)
 
-    filename = f"{kind}_praktyki_{praktyka_id}.pdf"
+    FILENAMES = {
+        "karta_1": f"karta_praktyki_1_skierowanie_{praktyka_id}.pdf",
+        "karta_2": f"karta_praktyki_2_potwierdzenie_{praktyka_id}.pdf",
+        "karta_3": f"karta_praktyki_3_ocena_{praktyka_id}.pdf",
+    }
+    filename = FILENAMES.get(kind, f"{kind}_praktyki_{praktyka_id}.pdf")
     r.setex(f"pdf_filename:{self.request.id}",
             current_app.config["CELERY_RESULT_EXPIRES"], filename)
 

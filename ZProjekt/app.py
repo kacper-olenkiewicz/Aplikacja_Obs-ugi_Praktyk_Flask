@@ -694,7 +694,10 @@ def _fix_xhtml2pdf_windows():
 
 _fix_xhtml2pdf_windows()
 
-VALID_PDF_KINDS = {"karta", "dziennik", "sprawozdanie", "ankieta", "program", "efekty"}
+VALID_PDF_KINDS = {
+    "karta", "karta_1", "karta_2", "karta_3",
+    "dziennik", "sprawozdanie", "ankieta", "program", "efekty",
+}
 
 
 @app.route("/praktyki/<int:praktyka_id>/pdf/<kind>")

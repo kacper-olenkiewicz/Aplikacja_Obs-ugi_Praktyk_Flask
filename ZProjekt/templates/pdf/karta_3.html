@@ -1,0 +1,139 @@
+{% extends "pdf/_base.html" %}
+{% block doc_title %}{% endblock %}
+{% block doc_subtitle %}{% endblock %}
+{% block body %}
+
+{# ────── Nagłówek uczelni + tytuł części ────── #}
+<table style="width:100%; border-collapse:collapse; margin-bottom:14px;">
+    <tr>
+        <td style="width:55%; vertical-align:top; font-size:10pt; line-height:1.4;">
+            <strong>Akademia Nauk Stosowanych</strong><br>
+            <strong>w Elblągu</strong><br>
+            Instytut Informatyki Stosowanej<br>
+            im. Krzysztofa Brzeskiego
+        </td>
+        <td style="width:45%; vertical-align:top; text-align:center; padding-top:14px;">
+            <span style="font-size:14pt; font-weight:bold; letter-spacing:1px;">KARTA PRAKTYKI ZAWODOWEJ</span><br>
+            <span style="font-size:10pt; font-weight:bold; color:#444;">Część 3 / 3 — Ocena przebiegu praktyki</span>
+        </td>
+    </tr>
+</table>
+
+{# ────── Identyfikacja praktyki ────── #}
+<table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:14px; font-size:10pt;">
+    <tr>
+        <td style="border:1px solid #000; padding:5px 8px; background:#f0f0f0; width:30%;"><strong>Student</strong></td>
+        <td style="border:1px solid #000; padding:5px 8px;">{{ student.pelne_imie or '' }}{% if student.nr_albumu %} &nbsp;·&nbsp; nr albumu: {{ student.nr_albumu }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td style="border:1px solid #000; padding:5px 8px; background:#f0f0f0;"><strong>Zakład pracy</strong></td>
+        <td style="border:1px solid #000; padding:5px 8px;">{{ p.firma_nazwa or '' }}{% if p.firma_adres %}, {{ p.firma_adres }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td style="border:1px solid #000; padding:5px 8px; background:#f0f0f0;"><strong>Termin praktyki</strong></td>
+        <td style="border:1px solid #000; padding:5px 8px;">od {{ p.data_od|pl_date if p.data_od else '………' }} do {{ p.efektywna_data_do|pl_date if p.efektywna_data_do else '………' }}</td>
+    </tr>
+</table>
+
+{# ────── Ocena przebiegu praktyki zawodowej ────── #}
+<table style="width:100%; border-collapse:collapse; border:1px solid #000;">
+    <tr>
+        <td style="border:1px solid #000; padding:12px 14px; font-size:10.5pt; line-height:1.7;">
+            <p style="text-align:center; font-weight:bold; font-size:12pt; margin:0 0 14px;">
+                Ocena przebiegu praktyki zawodowej
+            </p>
+
+            {# ZOPZ — zakładowy opiekun #}
+            <p style="margin:0 0 4px;">
+                <strong>Ocena parametryczna (w skali 2 do 5):</strong>&nbsp;
+                <span style="border-bottom:1px dotted #555; padding:0 18px; font-size:11pt;">
+                    {{ p.ocena_zopz_parametryczna if p.ocena_zopz_parametryczna else '' }}
+                </span>
+            </p>
+            <p style="margin:8px 0 2px;"><strong>Ocena opisowa:</strong></p>
+            {% set zopz_op = (p.ocena_zopz_opisowa or '').strip() %}
+            {% if zopz_op %}
+                <div style="border:1px solid #ccc; padding:6px 8px; min-height:60px; line-height:1.6;">
+                    {{ zopz_op|replace('\n', '<br>')|safe }}
+                </div>
+            {% else %}
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+            {% endif %}
+
+            <table style="width:100%; border-collapse:collapse; margin-top:18px;">
+                <tr>
+                    <td style="width:55%;">&nbsp;</td>
+                    <td style="width:45%; padding:24px 0 0; text-align:center; vertical-align:bottom;">
+                        <div style="border-top:1px dotted #555; padding-top:3px; font-size:9pt;">
+                            <strong>Zakładowy opiekun praktyki zawodowej</strong><br>
+                            (data, pieczęć i podpis)
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <hr style="border:none; border-top:1px solid #999; margin:18px 0;">
+
+            {# UOPZ — uczelniany opiekun #}
+            <p style="margin:0 0 4px;">
+                <strong>Ocena parametryczna (w skali 2 do 5):</strong>&nbsp;
+                <span style="border-bottom:1px dotted #555; padding:0 18px; font-size:11pt;">
+                    {{ p.ocena or '' }}
+                </span>
+            </p>
+            <p style="margin:8px 0 2px;"><strong>Ocena opisowa:</strong></p>
+            {% set uopz_op = (p.komentarz_promotora or '').strip() %}
+            {% if uopz_op %}
+                <div style="border:1px solid #ccc; padding:6px 8px; min-height:60px; line-height:1.6;">
+                    {{ uopz_op|replace('\n', '<br>')|safe }}
+                </div>
+            {% else %}
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+                <div style="border-bottom:1px dotted #555; min-height:18px; margin-bottom:4px;">&nbsp;</div>
+            {% endif %}
+
+            <table style="width:100%; border-collapse:collapse; margin-top:18px;">
+                <tr>
+                    <td style="width:55%;">&nbsp;</td>
+                    <td style="width:45%; padding:24px 0 0; text-align:center; vertical-align:bottom;">
+                        <div style="border-top:1px dotted #555; padding-top:3px; font-size:9pt;">
+                            <strong>Uczelniany opiekun praktyki zawodowej</strong><br>
+                            (data, pieczęć i podpis)
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <hr style="border:none; border-top:1px solid #999; margin:18px 0;">
+
+            {# Ocena sprawozdania #}
+            <p style="margin:0 0 4px;">
+                <strong>Ocena sprawozdania z praktyki (w skali 2 do 5):</strong>&nbsp;
+                <span style="border-bottom:1px dotted #555; padding:0 24px;">&nbsp;</span>
+            </p>
+
+            <table style="width:100%; border-collapse:collapse; margin-top:24px;">
+                <tr>
+                    <td style="width:55%;">&nbsp;</td>
+                    <td style="width:45%; padding:24px 0 0; text-align:center; vertical-align:bottom;">
+                        <div style="border-top:1px dotted #555; padding-top:3px; font-size:9pt;">
+                            (data i podpis uczelnianego opiekuna praktyki)
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<div style="margin-top:20px; padding:8px 12px; background:#f3f4f6; border-left:3px solid #6b7280; font-size:9pt; color:#374151;">
+    <strong>Część 3/3 — Ocena:</strong> wypełnia zakładowy opiekun (ocena ZOPZ) oraz uczelniany opiekun (ocena UOPZ i ocena sprawozdania)
+    po zakończeniu praktyki, w trakcie procesu zaliczeniowego.
+</div>
+
+{% endblock %}

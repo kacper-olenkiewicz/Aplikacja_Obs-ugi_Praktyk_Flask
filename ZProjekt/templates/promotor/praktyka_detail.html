@@ -391,7 +391,11 @@
 <div class="panel">
     <h2>Pobierz PDF</h2>
     <div style="display:flex;flex-direction:column;gap:6px;">
-        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta') }}">Karta praktyki</a>
+        <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Karta praktyki zawodowej (Zał. 3)</div>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta_1') }}">Karta praktyki — cz. 1 (Skierowanie)</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta_2') }}">Karta praktyki — cz. 2 (Potwierdzenie odbycia)</a>
+        <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='karta_3') }}">Karta praktyki — cz. 3 (Ocena)</a>
+        <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;">Pozostałe dokumenty</div>
         <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='dziennik') }}">Dziennik</a>
         <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='sprawozdanie') }}">Sprawozdanie</a>
         <a class="btn btn-secondary btn-sm" data-pdf href="{{ url_for('praktyka_pdf', praktyka_id=p.id, kind='ankieta') }}">Ankieta</a>
