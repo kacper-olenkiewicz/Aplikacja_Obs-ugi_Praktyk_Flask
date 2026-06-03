@@ -24,6 +24,8 @@ from msal import ConfidentialClientApplication
 from werkzeug.utils import secure_filename
 from sqlalchemy import or_
 
+from flask_cors import CORS
+
 from config import Config
 from extensions import db, migrate, celery, init_celery
 import models
@@ -41,6 +43,10 @@ ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "odt", "jpg", "jpeg", "png"}
 db.init_app(app)
 migrate.init_app(app, db)
 init_celery(app)
+
+from api import api_bp
+app.register_blueprint(api_bp, url_prefix="/api/v1")
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 # ---------- pomocnicze ----------
@@ -175,6 +181,8 @@ _SESSION_EXEMPT = frozenset({"index", "login", "auth_callback", "logout", "dev_l
 @app.before_request
 def check_session_health():
     """Przechwytuje wygasłe/uszkodzone sesje i przekierowuje na login."""
+    if request.path.startswith("/api/"):
+        return
     if request.endpoint in _SESSION_EXEMPT:
         return
     if "user" not in session:
@@ -938,6 +946,10 @@ def promotor_akcja(praktyka_id):
         p.status = "odrzucona"
         p.komentarz_promotora = komentarz
         flash("Praktyka odrzucona.", "info")
+    elif akcja == "edytuj_flagi" and p.status == "zaakceptowana":
+        p.porozumienie_podpisane = bool(request.form.get("porozumienie_podpisane"))
+        p.skierowanie_wystawione = bool(request.form.get("skierowanie_wystawione"))
+        flash("Flagi dokumentów zaktualizowane.", "info")
     elif akcja == "zalicz_sem6" and p.status == "w_trakcie":
         p.zaliczenie_sem6 = True
         p.data_zaliczenia_sem6 = date.today()
@@ -1433,8 +1445,16 @@ def praktyka_przedluzenie(praktyka_id):
         powod = request.form.get("powod", "").strip()
         godziny = _parse_int(request.form.get("godziny_nieobecnosci"))
         proponowana = _parse_date(request.form.get("proponowana_data_do"))
+        opis_inne = request.form.get("opis_inne", "").strip()
+        opis_dodatkowy = request.form.get("opis", "").strip()
+        if powod == "inne":
+            opis = opis_inne or opis_dodatkowy or None
+        else:
+            opis = opis_dodatkowy or None
         if not powod:
             flash("Wybierz powód.", "error")
+        elif powod == "inne" and not opis_inne:
+            flash("Opisz powód przedłużenia.", "error")
         elif powod == "choroba" and (not godziny or godziny <= 40):
             flash("Przy chorobie wymagana łączna nieobecność powyżej 40 godzin (§6.2).", "error")
         elif proponowana and p.data_do and (proponowana - p.data_do).days > 31:
@@ -1444,7 +1464,7 @@ def praktyka_przedluzenie(praktyka_id):
                 praktyka_id=p.id,
                 powod=powod,
                 godziny_nieobecnosci=godziny,
-                opis=request.form.get("opis", "").strip() or None,
+                opis=opis,
                 proponowana_data_do=proponowana,
             )
             db.session.add(wn)

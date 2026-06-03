@@ -205,13 +205,17 @@
 </div>
 <div>
 
-{% if p.status in ('zgloszona', 'do_oceny', 'w_trakcie') %}
+{% if p.status in ('zgloszona', 'zaakceptowana', 'do_oceny', 'w_trakcie') %}
 <div class="panel" style="border-color:var(--ans-red);">
     <h2>Akcja promotora</h2>
 
     {% if p.status == 'zgloszona' %}
         <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
             Student zgłosił wniosek o odbycie praktyki. Sprawdź dane firmy i opiekuna, a następnie zaakceptuj lub odrzuć zgłoszenie.
+        </p>
+    {% elif p.status == 'zaakceptowana' %}
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
+            Praktyka zaakceptowana. Możesz zaktualizować flagi dokumentów zanim student rozpocznie realizację.
         </p>
     {% elif p.status == 'w_trakcie' %}
         <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">
@@ -257,7 +261,7 @@
         </div>
         {% endif %}
 
-        {% if p.status == 'zgloszona' %}
+        {% if p.status in ('zgloszona', 'zaakceptowana') %}
         <div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;">
             <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;cursor:pointer;">
                 <input type="checkbox" name="porozumienie_podpisane" value="1" style="margin-top:2px;"
@@ -276,6 +280,10 @@
             {% if p.status == 'zgloszona' %}
                 <button class="btn btn-primary" type="submit" name="akcja" value="akceptuj">
                     Zaakceptuj zgłoszenie
+                </button>
+            {% elif p.status == 'zaakceptowana' %}
+                <button class="btn btn-primary" type="submit" name="akcja" value="edytuj_flagi">
+                    Zapisz zmiany
                 </button>
             {% elif p.status == 'w_trakcie' %}
                 {% if not p.zaliczenie_sem6 %}
@@ -345,6 +353,38 @@
         </div>
         <button class="btn btn-ghost btn-sm" type="submit">Zapisz potwierdzenia ZOPZ</button>
     </form>
+</div>
+{% endif %}
+
+{% if p.wnioski_przedluzenia.count() %}
+<div class="panel">
+    <h2>Wnioski o przedłużenie</h2>
+    {% for wn in p.wnioski_przedluzenia|sort(attribute='created_at', reverse=True) %}
+    <div style="border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+            <strong>{{ wn.powod_label }}</strong>
+            <span class="badge badge-{{ wn.status }}">{{ wn.status_label }}</span>
+        </div>
+        <dl class="kv" style="grid-template-columns:160px 1fr;font-size:13px;margin:0;">
+            <dt>Data złożenia</dt><dd>{{ wn.created_at|pl_date }}</dd>
+            {% if wn.godziny_nieobecnosci %}
+            <dt>Godz. nieobecności</dt><dd>{{ wn.godziny_nieobecnosci }} h</dd>
+            {% endif %}
+            {% if wn.proponowana_data_do %}
+            <dt>Proponowana data do</dt><dd>{{ wn.proponowana_data_do|pl_date }}</dd>
+            {% endif %}
+            {% if wn.opis %}
+            <dt>Opis</dt><dd>{{ wn.opis }}</dd>
+            {% endif %}
+            {% if wn.status == 'zatwierdzony' %}
+            <dt>Nowa data zakończenia</dt><dd><strong>{{ wn.nowa_data_do|pl_date }}</strong></dd>
+            {% endif %}
+            {% if wn.komentarz %}
+            <dt>Komentarz dyrektora</dt><dd>{{ wn.komentarz }}</dd>
+            {% endif %}
+        </dl>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 

@@ -39,3 +39,7 @@ class Config:
     DEV_LOGIN = os.getenv("DEV_LOGIN", "0") == "1"
 
     WYMAGANE_GODZINY_PRAKTYK = 960
+
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)

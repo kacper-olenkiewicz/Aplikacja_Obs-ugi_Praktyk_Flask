@@ -18,21 +18,41 @@
     <form method="post">
         <div class="field">
             <label>Powód <span class="req">*</span></label>
-            <select name="powod" required>
+            <select name="powod" id="powod" required onchange="togglePowod()">
                 <option value="">— wybierz —</option>
                 <option value="choroba">Choroba</option>
                 <option value="inne">Inne przyczyny niezależne od studenta</option>
             </select>
         </div>
-        <div class="field">
+        <div class="field" id="pole_godziny">
             <label>Liczba godzin nieobecności (przy chorobie)</label>
             <input type="number" min="1" name="godziny_nieobecnosci" placeholder="np. 56">
             <p class="hint">Wymagane powyżej 40 godzin dla uzyskania przedłużenia z tytułu choroby.</p>
         </div>
-        <div class="field">
-            <label>Opis sytuacji</label>
-            <textarea name="opis" rows="4"></textarea>
+        <div class="field" id="pole_opis_inne" style="display:none;">
+            <label>Opisz powód <span class="req">*</span></label>
+            <textarea name="opis_inne" id="opis_inne" rows="3" placeholder="Opisz dokładnie przyczynę, dla której wnioskujesz o przedłużenie"></textarea>
         </div>
+        <div class="field">
+            <label>Dodatkowe uwagi</label>
+            <textarea name="opis" rows="3"></textarea>
+        </div>
+        <script>
+        function togglePowod() {
+            var powod = document.getElementById('powod').value;
+            document.getElementById('pole_godziny').style.display = powod === 'choroba' ? '' : 'none';
+            var poleInne = document.getElementById('pole_opis_inne');
+            var opisInne = document.getElementById('opis_inne');
+            if (powod === 'inne') {
+                poleInne.style.display = '';
+                opisInne.required = true;
+            } else {
+                poleInne.style.display = 'none';
+                opisInne.required = false;
+            }
+        }
+        togglePowod();
+        </script>
         <div class="field">
             <label>Proponowana nowa data zakończenia</label>
             <input type="date" name="proponowana_data_do"
