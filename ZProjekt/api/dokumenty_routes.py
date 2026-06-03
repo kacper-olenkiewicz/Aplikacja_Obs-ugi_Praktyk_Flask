@@ -68,7 +68,7 @@ def api_dokument_download(praktyka_id, dok_id):
     p, err = api_get_own_praktyka(praktyka_id)
     if err:
         return err
-    d = models.Dokument.query.get(dok_id)
+    d = db.session.get(models.Dokument, dok_id)
     if d is None or d.praktyka_id != p.id:
         return jsonify({"error": "Dokument nie znaleziony"}), 404
     upload_dir = Path(current_app.config["UPLOAD_DIR"])
@@ -84,7 +84,7 @@ def api_dokument_delete(praktyka_id, dok_id):
     p, err = api_get_own_praktyka(praktyka_id)
     if err:
         return err
-    d = models.Dokument.query.get(dok_id)
+    d = db.session.get(models.Dokument, dok_id)
     if d is None or d.praktyka_id != p.id:
         return jsonify({"error": "Dokument nie znaleziony"}), 404
     upload_dir = Path(current_app.config["UPLOAD_DIR"])

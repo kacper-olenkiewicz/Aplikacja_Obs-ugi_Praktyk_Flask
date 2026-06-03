@@ -76,7 +76,7 @@ def api_dziennik_delete(praktyka_id, wpis_id):
     p, err = api_get_own_praktyka(praktyka_id)
     if err:
         return err
-    w = models.DziennikWpis.query.get(wpis_id)
+    w = db.session.get(models.DziennikWpis, wpis_id)
     if w is None or w.praktyka_id != p.id:
         return jsonify({"error": "Wpis nie znaleziony"}), 404
     db.session.delete(w)

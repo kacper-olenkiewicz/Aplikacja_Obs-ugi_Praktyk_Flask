@@ -41,7 +41,7 @@ def api_zmiana_terminu_list():
 @jwt_required
 def api_zmiana_terminu_detail(wn_id):
     user = api_current_user()
-    wn = models.WniosekZmianaTerminu.query.get(wn_id)
+    wn = db.session.get(models.WniosekZmianaTerminu, wn_id)
     if wn is None:
         return jsonify({"error": "Wniosek nie znaleziony"}), 404
     if wn.student_id != user.id:

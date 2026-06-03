@@ -84,7 +84,7 @@ def api_refresh():
     if payload.get("type") != "refresh":
         return jsonify({"error": "Nieprawidłowy typ tokenu"}), 401
 
-    user = models.User.query.get(int(payload["sub"]))
+    user = db.session.get(models.User, int(payload["sub"]))
     if user is None:
         return jsonify({"error": "Użytkownik nie istnieje"}), 401
 
@@ -103,7 +103,7 @@ def api_dev_login(user_id):
     if not current_app.config.get("DEV_LOGIN"):
         return jsonify({"error": "Dev login wyłączony"}), 404
 
-    user = models.User.query.get(user_id)
+    user = db.session.get(models.User, user_id)
     if user is None:
         return jsonify({"error": "Użytkownik nie istnieje"}), 404
 

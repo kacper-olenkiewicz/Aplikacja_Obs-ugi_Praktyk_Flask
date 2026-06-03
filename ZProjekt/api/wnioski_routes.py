@@ -114,7 +114,7 @@ def api_wniosek_delete_dok(wniosek_id, dok_id):
     w, err = api_get_own_wniosek(wniosek_id)
     if err:
         return err
-    d = models.WniosekDokument.query.get(dok_id)
+    d = db.session.get(models.WniosekDokument, dok_id)
     if d is None or d.wniosek_id != w.id:
         return jsonify({"error": "Dokument nie znaleziony"}), 404
     upload_dir = Path(current_app.config["UPLOAD_DIR"])
@@ -133,7 +133,7 @@ def api_wniosek_download_dok(wniosek_id, dok_id):
     w, err = api_get_own_wniosek(wniosek_id)
     if err:
         return err
-    d = models.WniosekDokument.query.get(dok_id)
+    d = db.session.get(models.WniosekDokument, dok_id)
     if d is None or d.wniosek_id != w.id:
         return jsonify({"error": "Dokument nie znaleziony"}), 404
     upload_dir = Path(current_app.config["UPLOAD_DIR"])

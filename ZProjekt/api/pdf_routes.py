@@ -47,7 +47,10 @@ def api_pdf_status(task_id):
     state = result.state
     ready = state == "SUCCESS"
     failed = state == "FAILURE"
-    return jsonify({"state": state, "ready": ready, "failed": failed})
+    payload = {"state": state, "ready": ready, "failed": failed}
+    if failed:
+        payload["message"] = str(result.info) if result.info else "Nieznany blad."
+    return jsonify(payload)
 
 
 @api_bp.route("/pdf/download/<task_id>")

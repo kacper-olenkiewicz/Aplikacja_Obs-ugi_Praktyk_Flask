@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Nie znaleziono · Praktyki ANS{% endblock %}
+{% block content %}
+<section style="max-width:640px; margin:60px auto; padding:0 24px; text-align:center;">
+    <h1 style="font-size:64px; margin:0; color:#234;">404</h1>
+    <h2 style="margin:8px 0 16px;">Nie znaleziono strony</h2>
+    <p>Strona, której szukasz, nie istnieje lub została przeniesiona.</p>
+    <p style="margin-top:24px;">
+        <a class="btn btn-primary" href="{{ url_for('index') }}">Wróć na stronę główną</a>
+    </p>
+</section>
+{% endblock %}

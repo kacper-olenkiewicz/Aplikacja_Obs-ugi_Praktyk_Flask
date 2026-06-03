@@ -66,7 +66,7 @@ def current_user():
     if not uid:
         return None
     if "_user_obj" not in g:
-        g._user_obj = models.User.query.get(uid)
+        g._user_obj = db.session.get(models.User, uid)
     return g._user_obj
 
 
@@ -193,7 +193,7 @@ def check_session_health():
         flash("Sesja wygasła. Zaloguj się ponownie.", "error")
         return redirect(url_for("index"))
     try:
-        if models.User.query.get(uid) is None:
+        if db.session.get(models.User, uid) is None:
             session.clear()
             flash("Konto nie istnieje lub sesja wygasła. Zaloguj się ponownie.", "error")
             return redirect(url_for("index"))
@@ -206,6 +206,31 @@ def check_session_health():
 def handle_401(e):
     flash("Sesja wygasła lub brak dostępu. Zaloguj się ponownie.", "error")
     return redirect(url_for("index"))
+
+
+@app.errorhandler(403)
+def handle_403(e):
+    if request.path.startswith("/api/"):
+        from flask import jsonify
+        return jsonify({"error": "Brak dostępu"}), 403
+    return render_template("403.html"), 403
+
+
+@app.errorhandler(404)
+def handle_404(e):
+    if request.path.startswith("/api/"):
+        from flask import jsonify
+        return jsonify({"error": "Nie znaleziono"}), 404
+    return render_template("404.html"), 404
+
+
+@app.errorhandler(500)
+def handle_500(e):
+    db.session.rollback()
+    if request.path.startswith("/api/"):
+        from flask import jsonify
+        return jsonify({"error": "Blad serwera"}), 500
+    return render_template("500.html"), 500
 
 
 @app.template_filter("pl_date")
@@ -727,14 +752,17 @@ def wniosek_pdf(wniosek_id):
 @app.route("/pdf/status/<task_id>")
 @login_required
 def pdf_status(task_id):
-    import redis as redis_lib
     from flask import jsonify
     from celery.result import AsyncResult
     result = AsyncResult(task_id, app=celery)
     state = result.state  # PENDING / SUCCESS / FAILURE
     ready = state == "SUCCESS"
     failed = state == "FAILURE"
-    return jsonify({"state": state, "ready": ready, "failed": failed})
+    payload = {"state": state, "ready": ready, "failed": failed}
+    if failed:
+        # result.info zwykle to wyjątek lub jego repr; pokazujemy frontendowi.
+        payload["message"] = str(result.info) if result.info else "Nieznany blad."
+    return jsonify(payload)
 
 
 @app.route("/pdf/download/<task_id>")

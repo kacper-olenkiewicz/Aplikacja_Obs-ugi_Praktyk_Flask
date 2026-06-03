@@ -5,6 +5,7 @@ from functools import wraps
 from flask import request, g, current_app, jsonify
 
 import models
+from extensions import db
 
 
 def create_access_token(user):
@@ -51,7 +52,7 @@ def jwt_required(view):
             return jsonify({"error": "Nieprawidłowy token"}), 401
         if payload.get("type") != "access":
             return jsonify({"error": "Nieprawidłowy typ tokenu"}), 401
-        user = models.User.query.get(int(payload["sub"]))
+        user = db.session.get(models.User, int(payload["sub"]))
         if user is None:
             return jsonify({"error": "Użytkownik nie istnieje"}), 401
         g.api_user = user
@@ -65,7 +66,7 @@ def api_current_user():
 
 def api_get_own_praktyka(praktyka_id):
     user = api_current_user()
-    p = models.Praktyka.query.get(praktyka_id)
+    p = db.session.get(models.Praktyka, praktyka_id)
     if p is None:
         return None, (jsonify({"error": "Praktyka nie znaleziona"}), 404)
     if p.student_id != user.id:
@@ -75,7 +76,7 @@ def api_get_own_praktyka(praktyka_id):
 
 def api_get_own_wniosek(wniosek_id):
     user = api_current_user()
-    w = models.WniosekZaliczenia.query.get(wniosek_id)
+    w = db.session.get(models.WniosekZaliczenia, wniosek_id)
     if w is None:
         return None, (jsonify({"error": "Wniosek nie znaleziony"}), 404)
     if w.student_id != user.id:
