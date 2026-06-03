@@ -65,7 +65,8 @@ def current_user():
     uid = session["user"].get("id")
     if not uid:
         return None
-    if "_user_obj" not in g:
+    cached = g.get("_user_obj")
+    if cached is None or cached.id != uid:
         g._user_obj = db.session.get(models.User, uid)
     return g._user_obj
 
