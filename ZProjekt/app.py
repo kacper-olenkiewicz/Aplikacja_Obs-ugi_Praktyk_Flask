@@ -694,27 +694,6 @@ def dokument_usun(praktyka_id, dok_id):
 
 # ---------- PDF (asynchroniczne przez Celery) ----------
 
-def _fix_xhtml2pdf_windows():
-    """Naprawia blokadę NamedTemporaryFile na Windowsie w xhtml2pdf."""
-    import tempfile
-    import xhtml2pdf.files as xf
-
-    def _get_named_tmp_file(self):
-        data = self.get_data()
-        tmp_file = tempfile.NamedTemporaryFile(suffix=self.suffix, delete=False)
-        if data:
-            tmp_file.write(data)
-            tmp_file.flush()
-            tmp_file.close()
-        if self.path is None:
-            self.path = tmp_file.name
-        return tmp_file
-
-    xf.BaseFile.get_named_tmp_file = _get_named_tmp_file
-
-
-_fix_xhtml2pdf_windows()
-
 VALID_PDF_KINDS = {
     "karta", "karta_1", "karta_2", "karta_3",
     "dziennik", "sprawozdanie", "ankieta", "program", "efekty",

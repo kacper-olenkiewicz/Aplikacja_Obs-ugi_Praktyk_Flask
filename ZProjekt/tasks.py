@@ -1,9 +1,8 @@
-import io
 import os
 
 import redis as redis_lib
 from flask import render_template, current_app
-from xhtml2pdf import pisa
+from weasyprint import HTML
 
 from extensions import celery, db
 import models
@@ -14,21 +13,12 @@ def _get_redis():
     return redis_lib.Redis.from_url(url)
 
 
-def _link_callback(uri, rel):
-    if uri.startswith("/static/"):
-        static_root = current_app.static_folder
-        return os.path.join(static_root, uri[len("/static/"):].replace("/", os.sep))
-    return uri
-
-
 def _build_pdf_bytes(template, **ctx):
     html = render_template(template, **ctx)
-    buf = io.BytesIO()
-    result = pisa.CreatePDF(src=html, dest=buf, encoding="utf-8",
-                            link_callback=_link_callback)
-    if result.err:
-        raise RuntimeError("xhtml2pdf error")
-    return buf.getvalue()
+    # base_url = root aplikacji, dzięki czemu url('static/fonts/arial.ttf')
+    # w templatkach PDF rozwiązuje się do realnego pliku.
+    base_url = current_app.root_path + os.sep
+    return HTML(string=html, base_url=base_url).write_pdf()
 
 
 @celery.task(bind=True, max_retries=2)

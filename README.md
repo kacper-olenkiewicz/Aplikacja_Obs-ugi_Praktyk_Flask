@@ -387,10 +387,11 @@ Generowane dokumenty:
 
 Projekt zawiera pelna konfiguracje Docker:
 - `Dockerfile` -- obraz Python 3.12 + Gunicorn
-- `docker-compose.yml` -- orkiestracja 5 serwisow:
+- `docker-compose.yml` -- orkiestracja 6 serwisow:
   - `postgres` -- baza danych PostgreSQL 16
+  - `pgbouncer` -- pooling polaczen przed Postgresem
   - `redis` -- broker Celery i cache wynikow PDF
-  - `web` -- aplikacja Flask (Gunicorn)
+  - `web` -- aplikacja Flask (Gunicorn) z healthcheckiem `/healthz`
   - `worker` -- Celery worker (generowanie PDF w tle)
   - `nginx` -- reverse proxy + pliki statyczne
 - `nginx/nginx.conf` -- konfiguracja Nginx
@@ -401,6 +402,19 @@ Uruchomienie produkcyjne:
 docker compose up -d
 docker compose run --rm web flask db upgrade
 ```
+
+> **Uwaga (produkcja).**
+> `pgbouncer/userlist.txt` w repo zawiera plaintextowe haslo wylacznie do
+> celow dev. Na produkcji podstaw MD5 (lub SCRAM-SHA-256) zgodne z haslem
+> w Postgresie. MD5 generujesz tak:
+>
+> ```bash
+> # format: "user" "md5<md5(passwd+user)>"
+> printf 'md5%s\n' $(echo -n "${POSTGRES_PASSWORD}${POSTGRES_USER}" | md5sum | cut -d' ' -f1)
+> ```
+>
+> Wpis w `userlist.txt` ma postac `"praktyki" "md5xxxxxxxx..."` (z LF na koncu,
+> bez komentarzy -- PgBouncer ich nie toleruje w tym pliku).
 
 ---
 
