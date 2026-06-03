@@ -46,7 +46,7 @@ init_celery(app)
 
 from api import api_bp
 app.register_blueprint(api_bp, url_prefix="/api/v1")
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
 
 
 # ---------- pomocnicze ----------
@@ -175,7 +175,7 @@ def inject_globals():
     }
 
 
-_SESSION_EXEMPT = frozenset({"index", "login", "auth_callback", "logout", "dev_login", "static"})
+_SESSION_EXEMPT = frozenset({"index", "login", "auth_callback", "logout", "dev_login", "static", "healthz"})
 
 
 @app.before_request
@@ -222,6 +222,19 @@ def pl_time(value):
     if not value:
         return ""
     return value.strftime("%H:%M")
+
+
+# ---------- healthcheck ----------
+
+@app.route("/healthz")
+def healthz():
+    from flask import jsonify
+    from sqlalchemy import text
+    try:
+        db.session.execute(text("SELECT 1"))
+        return jsonify({"status": "ok"}), 200
+    except Exception as exc:
+        return jsonify({"status": "error", "detail": str(exc)}), 503
 
 
 # ---------- strony publiczne / auth ----------

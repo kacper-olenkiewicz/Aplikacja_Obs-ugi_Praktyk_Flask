@@ -1,6 +1,8 @@
 -- =============================================================================
 -- SCHEMAT BAZY DANYCH — Projekt Praktyki ANS Elbląg
--- Wygenerowany ręcznie na podstawie migracji Alembic
+-- Aby zregenerować ten plik ze stanu migracji Alembic uruchom:
+--     .\scripts\regen-schema-sql.ps1
+-- (skrypt podnosi tymczasowy Postgres, robi `flask db upgrade` i pg_dump).
 -- PostgreSQL 16
 -- =============================================================================
 

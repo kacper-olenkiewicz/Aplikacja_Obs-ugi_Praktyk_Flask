@@ -19,6 +19,37 @@ services:
     networks:
       - backend
 
+  # ── PgBouncer — connection pooling przed Postgresem ─────────────────────────
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: praktyki_pgbouncer
+    restart: unless-stopped
+    environment:
+      # Używane przez entrypoint jako fallback, jeśli nie zamontujemy own configu.
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: ${POSTGRES_USER:-praktyki}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-haslo}
+      DB_NAME: ${POSTGRES_DB:-praktyki_db}
+      AUTH_TYPE: md5
+      POOL_MODE: session
+      MAX_CLIENT_CONN: "2000"
+      DEFAULT_POOL_SIZE: "30"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER:-praktyki}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend
+
 # ── Redis — broker Celery + backend wyników ──────────────────────────────────
   redis:
     image: redis:7-alpine
@@ -43,19 +74,27 @@ services:
     restart: unless-stopped
     env_file: ZProjekt/.env
     environment:
-      DATABASE_URL:           postgresql+psycopg2://${POSTGRES_USER:-praktyki}:${POSTGRES_PASSWORD:-haslo}@postgres:5432/${POSTGRES_DB:-praktyki_db}
+      DATABASE_URL:           postgresql+psycopg2://${POSTGRES_USER:-praktyki}:${POSTGRES_PASSWORD:-haslo}@pgbouncer:5432/${POSTGRES_DB:-praktyki_db}
       REDIS_URL:              redis://redis:6379/0
       CELERY_BROKER_URL:      redis://redis:6379/0
       CELERY_RESULT_BACKEND:  redis://redis:6379/1
       SQLALCHEMY_POOL_SIZE:   "5"
       SQLALCHEMY_MAX_OVERFLOW: "5"
+      WEB_WORKERS:            "4"
+      CORS_ORIGINS:           ${CORS_ORIGINS:-*}
     volumes:
       - praktyki_uploads:/app/uploads
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5000/healthz', timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - backend
       - frontend
@@ -73,17 +112,23 @@ services:
     restart: unless-stopped
     env_file: ZProjekt/.env
     environment:
-      DATABASE_URL:           postgresql+psycopg2://${POSTGRES_USER:-praktyki}:${POSTGRES_PASSWORD:-haslo}@postgres:5432/${POSTGRES_DB:-praktyki_db}
+      DATABASE_URL:           postgresql+psycopg2://${POSTGRES_USER:-praktyki}:${POSTGRES_PASSWORD:-haslo}@pgbouncer:5432/${POSTGRES_DB:-praktyki_db}
       REDIS_URL:              redis://redis:6379/0
       CELERY_BROKER_URL:      redis://redis:6379/0
       CELERY_RESULT_BACKEND:  redis://redis:6379/1
     volumes:
       - praktyki_uploads:/app/uploads
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A celery_worker.celery inspect ping -d celery@$$HOSTNAME >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
       - backend
 
@@ -99,7 +144,8 @@ services:
       - ./ZProjekt/static:/app/static:ro
       - praktyki_uploads:/app/uploads:ro
     depends_on:
-      - web
+      web:
+        condition: service_healthy
     networks:
       - frontend
 

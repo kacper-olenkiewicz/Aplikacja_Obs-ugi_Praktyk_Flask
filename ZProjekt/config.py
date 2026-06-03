@@ -38,6 +38,14 @@ class Config:
 
     DEV_LOGIN = os.getenv("DEV_LOGIN", "0") == "1"
 
+    # CORS — w dev "*", w produkcji lista dozwolonych origins po przecinku
+    # (np. https://app.example.pl,capacitor://localhost). Mobilka i web frontend.
+    _cors_raw = os.getenv("CORS_ORIGINS", "*").strip()
+    if _cors_raw == "*":
+        CORS_ORIGINS = "*"
+    else:
+        CORS_ORIGINS = [o.strip() for o in _cors_raw.split(",") if o.strip()]
+
     WYMAGANE_GODZINY_PRAKTYK = 960
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
